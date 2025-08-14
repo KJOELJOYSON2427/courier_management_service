@@ -1,0 +1,21 @@
+
+server:
+  port: 8081
+
+spring:
+  application:
+    name: parcelorCourierService
+  datasource:
+    url: jdbc:postgresql://localhost:5432/courierdb
+    username: postgres
+    password: joel.2427
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    open-in-view: false
