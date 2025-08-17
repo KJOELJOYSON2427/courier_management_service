@@ -32,5 +32,5 @@ public class Driver {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private DriverStatus status;
+    private  DriverStatus status;
 }

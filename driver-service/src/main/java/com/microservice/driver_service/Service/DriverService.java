@@ -5,6 +5,7 @@ import com.microservice.driver_service.RequestDTO.DriverRequest;
 import com.microservice.driver_service.ResponseDTO.DriverResponse;
 import com.microservice.driver_service.repository.DriverRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -14,8 +15,12 @@ import org.springframework.stereotype.Service;
 public class DriverService {
 
 
+
+      @Autowired
      private final DriverMapper driverMapper;
+      @Autowired
      private final DriverRepository driverRepository;
+      @Autowired
     private final RedisTemplate<String, Object> redisTemplate;
     private static final String DRIVER_CACHE_PREFIX = "driver:";
 
