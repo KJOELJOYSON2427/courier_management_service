@@ -12,6 +12,8 @@ public class DriverMapper {
     public Driver toEnity(DriverRequest request){
         return Driver.builder()
                 .name(request.getName())
+                .driverId(request.getDriverId())
+                .email(request.getEmail())
                 .licenseNumber(request.getLicenseNumber())
                 .status(DriverStatus.valueOf(request.getStatus().toUpperCase()))
                 .phoneNumber(request.getPhoneNumber())
@@ -24,6 +26,8 @@ public class DriverMapper {
     public DriverResponse toResponse(Driver driver){
         return  DriverResponse.builder()
                 .name(driver.getName())
+                .driverId(driver.getDriverId())
+                .email(driver.getEmail())
                 .licenseNumber(driver.getLicenseNumber())
                 .PhoneNumber(driver.getPhoneNumber())
                 .status(driver.getStatus().name())

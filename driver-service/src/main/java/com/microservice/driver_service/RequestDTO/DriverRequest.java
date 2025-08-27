@@ -10,6 +10,8 @@ import lombok.*;
 public class DriverRequest {
 
     private String name;
+    private Long driverId;
+    private String email;
     private String licenseNumber;
     private String status;
     private String PhoneNumber;
