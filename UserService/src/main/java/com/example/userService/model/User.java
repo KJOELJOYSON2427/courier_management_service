@@ -54,5 +54,18 @@ public class User {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;   // Automatically updated on update
+
+   public User(){
+   }
+
+    public User(String fullName, String password, String email, String country, String address, Integer age) {
+
+        this.fullName = fullName;
+        this.password = password;
+        this.email = email;
+        this.country = country;
+        this.address = address;
+        this.age = age;
+    }
 }
 
