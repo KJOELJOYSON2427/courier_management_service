@@ -1,12 +1,12 @@
 
 server:
-  port: 8081
+  port: 8083
 
 spring:
   application:
-    name: parcel-service
+    name: user-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/courierdb
+    url: jdbc:postgresql://localhost:5432/userdb
     username: postgres
     password: joel.2427
     driver-class-name: org.postgresql.Driver

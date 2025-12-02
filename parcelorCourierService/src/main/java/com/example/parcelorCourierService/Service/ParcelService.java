@@ -8,11 +8,13 @@ import com.example.parcelorCourierService.Entity.dto.ParcelDtoMapper;
 import com.example.parcelorCourierService.Entity.dto.ParcelHistoryDto;
 import com.example.parcelorCourierService.repository.ParcelRepository;
 import com.example.parcelorCourierService.request.ParcelRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +35,7 @@ public class ParcelService {
         parcel.setWeight(request.getWeight());
         parcel.setDimensions(request.getDimensions());
         parcel.setStatus(ParcelStatus.CREATED);
+        parcel.setParcelGetId(request.getParcelGetId());
         parcel.setCreatedAt(LocalDateTime.now());
         parcel.setUpdatedAt(LocalDateTime.now());
 parcel.setTrackingNumber(request.getTrackingNumber());
@@ -127,4 +130,28 @@ parcel.setTrackingNumber(request.getTrackingNumber());
     }
 
 
+    @Transactional
+    public void assignDriver(Long parcelId, Long driverId) {
+        Parcel parcel = parcelRepository.findByParcelGetId(parcelId)
+                .orElseThrow(() -> new RuntimeException("Parcel not found"));
+        parcel.setStatus(ParcelStatus.ASSIGNED);
+        parcel.setDriverId(driverId);
+        parcelRepository.save(parcel);
+
+    }
+
+    public void markAsDelivered(Long parcelId) {
+        Parcel parcel = parcelRepository.findByParcelGetId(parcelId).orElseThrow(
+                () -> new RuntimeException("Parcel not found")
+        );
+    parcel.setStatus(ParcelStatus.DELIVERED);
+    parcelRepository.save(parcel);
+    }
+
+    public List<ParcelDTO> getParcelsByDriver(Long driverId) {
+        List<Parcel> parcels = parcelRepository.findByDriverId(driverId);
+        return parcels.stream()
+                .map(ParcelDtoMapper::mapToResponse)
+                .toList();
+    }
 }

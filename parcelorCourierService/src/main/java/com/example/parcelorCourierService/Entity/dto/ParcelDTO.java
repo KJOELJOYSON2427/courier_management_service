@@ -15,7 +15,7 @@ public class ParcelDTO {
     private Long id;
 
     private  Long senderId;
-
+    private Long parcelGetId;
     private String receiverName;
     private String trackingNumber; // NEW FIELD
     private String receiverAddress;

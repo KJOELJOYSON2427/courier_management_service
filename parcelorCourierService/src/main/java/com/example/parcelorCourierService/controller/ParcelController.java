@@ -50,4 +50,7 @@ public class ParcelController {
 
         return ResponseEntity.ok(parcelService.getParcelByCustomerId(senderId));
     }
+
+
+
 }

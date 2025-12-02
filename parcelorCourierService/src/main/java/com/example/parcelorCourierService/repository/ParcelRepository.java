@@ -20,4 +20,8 @@ public interface ParcelRepository extends JpaRepository<Parcel, Long> {
 
     @Query("SELECT p FROM Parcel p where p.senderId = :senderId")
     List<Parcel> findBySenderId(@Param("senderId") Long senderId);
+
+    Optional<Parcel> findByParcelGetId(Long parcelId);
+
+    List<Parcel> findByDriverId(Long driverId);
 }

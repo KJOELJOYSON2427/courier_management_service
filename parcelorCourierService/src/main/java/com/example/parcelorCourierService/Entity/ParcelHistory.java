@@ -20,7 +20,7 @@ public class ParcelHistory {
     private  Long id;
 private String description;
     private  String status;
-
+    private Long parcelGetId;
 
     private LocalDateTime timestamp;
 

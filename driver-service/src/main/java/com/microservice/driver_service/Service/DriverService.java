@@ -5,6 +5,7 @@ import com.microservice.driver_service.Entity.DriverStatus;
 import com.microservice.driver_service.RequestDTO.DriverRequest;
 import com.microservice.driver_service.ResponseDTO.DriverResponse;
 import com.microservice.driver_service.openFeign.ParcelClient;
+import com.microservice.driver_service.openFeign.ParcelDTO;
 import com.microservice.driver_service.repository.DriverCacheRepository;
 import com.microservice.driver_service.repository.DriverRepository;
 import lombok.RequiredArgsConstructor;
@@ -151,5 +152,21 @@ private final DriverCacheRepository redis;
         DriverResponse response = driverMapper.toResponse(savedDriver);
         redisTemplate.opsForValue().set("driver:" + driverId, response);
         return driverMapper.toResponse(savedDriver);
+    }
+
+
+    public List<ParcelDTO> getDriverParcels(Long driverId){
+        String key = "driver:parcels:" + driverId;
+        List<ParcelDTO> cachedParcels=(List<ParcelDTO>) redisTemplate.opsForValue().get(key);
+        if(cachedParcels !=null){
+            System.out.println("Returning parcels from Redis cache...");
+            return cachedParcels;
+        }
+        // 2. If not in Redis, fetch from Parcel Service
+        System.out.println("Fetching parcels from Parcel Service...");
+        List<ParcelDTO> parcels = parcelClient.getParcelsByDriverId(driverId);
+        // 3. Store in Redis with TTL (optional)
+        redisTemplate.opsForValue().set(key, parcels, 5, TimeUnit.MINUTES);
+        return parcels;
     }
 }

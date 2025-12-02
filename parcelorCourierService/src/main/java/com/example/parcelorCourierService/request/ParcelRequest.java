@@ -8,11 +8,31 @@ import lombok.Setter;
 @Setter
 @Data
 public class ParcelRequest {
-    private Long senderId; // From user DB
+
+    // Getters & Setters
+    private Long parcelId;        // Internal use (optional)
+    private Long senderId;        // From User DB
+
+    // SENDER DETAILS (REQUIRED)
+    private String senderName;
+    private String senderEmail;
+    private String senderAddress;
+
+    // RECEIVER DETAILS (REQUIRED)
     private String receiverName;
     private String receiverAddress;
+    private String receiverEmail;
+
+    // PARCEL DETAILS
     private double weight;
     private String dimensions;
-    private String trackingNumber; // NEW FIELD
-    // Getters and Setters
+    private double cost;
+
+    private Long parcelGetId;
+
+    private String trackingNumber; // Generated or user-provided
+
+    // Optional: status (usually NOT sent from client)
+    private String status; // Optional — use ParcelStatus enum in service layer
+
 }

@@ -13,6 +13,6 @@ public interface ParcelClient {
     @PostMapping("/internal/parcels/{parcelId}/assign-driver/{driverId}")
     void assignParcelToDriver(@PathVariable Long parcelId, @PathVariable Long driverId);
 
-    @GetMapping("/parcels/driver/{driverId}")
+    @GetMapping("/internal/parcels/driver/{driverId}")
     List<ParcelDTO>  getParcelsByDriverId(@PathVariable Long driverId);
 }
