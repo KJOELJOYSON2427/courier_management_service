@@ -1,60 +1,47 @@
 package com.example.userService.controller;
 
-import com.example.userService.Error.ErrorResponse;
-import com.example.userService.Response.LoginResponse;
+import com.example.userService.Response.ApiResponse;
 import com.example.userService.Response.UserResponse;
-import com.example.userService.request.CreateUserRequest;
-import com.example.userService.request.LoginRequest;
+import com.example.userService.model.User;
 import com.example.userService.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @Controller
-@RequestMapping("/auth")
+@RestController("/user")
 public class UserController {
 
     @Autowired
     private UserService userService;
 
-
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody CreateUserRequest userRequest) {
+    //Deleting the User
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id){
         try {
-            UserResponse user = userService.createUser(userRequest);
-            return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body(user);
-
-        } catch (Exception ex) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse("Registration failed", ex.getMessage()));
+            userService.deleteUserById(id);
+            return ResponseEntity.ok("User deleted successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
-
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
-        LoginResponse loginResponse = userService.loginUser(loginRequest);
-
-        if (loginResponse.getId() != null) {
-            // Successful login → HTTP 200 OK
-            return ResponseEntity.ok(
-                    loginResponse
-            );
-        } else {
-            // Failed login → HTTP 401 Unauthorized
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(
-                            loginResponse.getMessage()
-                    );
-        }
+    //Get all the users
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<User>>> getUser(){
+        List<User> users = userService.getAllUsers();
+        ApiResponse<List<User>> response = new ApiResponse<>(
+                users.isEmpty() ? 204 : 200,
+                users.isEmpty() ? "No users found" : "Users retrieved successfully",
+                users
+        );
+        return  ResponseEntity.status(response.getStatus()).body(response);
     }
-
 }

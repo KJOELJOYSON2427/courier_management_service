@@ -11,7 +11,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -104,5 +106,20 @@ public class UserService {
             return new LoginResponse(null, null, null, e.getMessage(), null);
         }
     }
+
+
+    public void deleteUserById(Long id) {
+        // Check if user exists
+        if (!userRepository.existsById(id)) {
+            throw new RuntimeException("User with ID " + id + " not found");
+        }
+
+        userRepository.deleteById(id);
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();  // returns all users
+    }
+
 
 }
