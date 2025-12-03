@@ -14,17 +14,16 @@ import java.util.List;
 @Table(name = "parcels")
 public class Parcel {
 
-    public Parcel() {
-        this.history = new ArrayList<>();
-        // Default status
-    }
+//    public Parcel() {
+//        this.history = new ArrayList<>();
+//        // Default status
+//    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
-    private Long parcelGetId;
+
 
     @Column(unique = true, nullable = false)
     private String trackingNumber;
@@ -76,7 +75,7 @@ public class Parcel {
     // DRIVER
     private Long driverId;
 
-    // HISTORY RELATION
-    @OneToMany(mappedBy = "parcel", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ParcelHistory> history;
+//    // HISTORY RELATION
+//    @OneToMany(mappedBy = "parcel", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<ParcelHistory> history;
 }

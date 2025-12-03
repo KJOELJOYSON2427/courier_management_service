@@ -2,6 +2,7 @@ package com.example.parcelorCourierService.repository;
 
 import com.example.parcelorCourierService.Entity.Parcel;
 import com.example.parcelorCourierService.Entity.dto.ParcelDTO;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,14 +15,23 @@ import java.util.Optional;
 @Repository
 public interface ParcelRepository extends JpaRepository<Parcel, Long> {
 
-    @Query("SELECT p FROM Parcel p LEFT JOIN FETCH p.history WHERE p.trackingNumber = :trackingNumber")
-    Optional<Parcel> findByTrackingNumberWithHistory(@Param("trackingNumber") String trackingNumber);
+//    @Query("SELECT p FROM Parcel p LEFT JOIN FETCH p.history WHERE p.trackingNumber = :trackingNumber")
+//    Optional<Parcel> findByTrackingNumberWithHistory(@Param("trackingNumber") String trackingNumber);
+//
+//
+//    @Query("SELECT p FROM Parcel p where p.senderId = :senderId")
+//    List<Parcel> findBySenderId(@Param("senderId") Long senderId);
+//
+//    Optional<Parcel> findByParcelGetId(Long parcelId);
+//
+//    List<Parcel> findByDriverId(Long driverId);
 
 
-    @Query("SELECT p FROM Parcel p where p.senderId = :senderId")
-    List<Parcel> findBySenderId(@Param("senderId") Long senderId);
 
-    Optional<Parcel> findByParcelGetId(Long parcelId);
+    //--------- Frontend ------
+    // Custom method to find a parcel by tracking number
+    Parcel findByTrackingNumber(String trackingNumber);
 
-    List<Parcel> findByDriverId(Long driverId);
+    //To get The Parcel By the SenderEmail
+    List<Parcel> findBySenderEmail(String email, Sort sort);
 }
