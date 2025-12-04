@@ -4,6 +4,8 @@ package com.example.gateway.config.security.filters;
 import com.example.gateway.config.security.Manager.JwtReactiveAuthenticationManager;
 import com.example.gateway.config.security.convertor.JwtServerAuthenticationConverter;
 import com.example.gateway.config.security.headerFilter.JwtHeaderForwardFilter;
+import com.example.gateway.service.JWTService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -37,6 +39,26 @@ Spring Security manages: Filter ordering, Error handling, Security context popul
 public class SecurityConfig {
     public SecurityConfig() {
     }
+    @Autowired
+    private  JWTService jwtService;
+    // THIS WAS MISSING → this is exactly what Spring complained about
+    @Bean
+    public JwtServerAuthenticationConverter jwtServerAuthenticationConverter() {
+        return new JwtServerAuthenticationConverter();   // adjust constructor if you pass key/claims etc.
+    }
+
+    // Your authentication manager is presumably already a @Bean somewhere
+    // (if not, add it here too)
+    @Bean
+    public JwtReactiveAuthenticationManager jwtReactiveAuthenticationManager() {
+        return new JwtReactiveAuthenticationManager(jwtService);   // or inject the converter/key here if needed
+    }
+
+    // Optional but recommended: your header forward filter as bean
+    @Bean
+    public JwtHeaderForwardFilter jwtHeaderForwardFilter() {
+        return new JwtHeaderForwardFilter();
+    }
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http,
@@ -48,7 +70,8 @@ public class SecurityConfig {
                  )
                  .authorizeExchange(
                          exchanges -> exchanges
-                                 .pathMatchers("*/auth/**").permitAll()
+                                 .pathMatchers("/api/v1/auth/**").permitAll()   // <── this allows register & login
+                                 .pathMatchers("/eureka/**").permitAll()
                                  .anyExchange().authenticated()
                  ).securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
                  .addFilterAt(jwtAuthenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)

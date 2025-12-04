@@ -1,5 +1,6 @@
 package com.example.gateway.config.security.headerFilter;
 
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
@@ -25,7 +26,7 @@ Original exchange
     Downstream filter receives new exchange
 
  */
-@Component
+@Configuration
 public class JwtHeaderForwardFilter  implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {

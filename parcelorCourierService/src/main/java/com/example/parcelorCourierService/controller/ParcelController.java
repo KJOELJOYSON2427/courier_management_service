@@ -5,6 +5,7 @@ import com.example.parcelorCourierService.Entity.Parcel;
 import com.example.parcelorCourierService.Entity.dto.ParcelDTO;
 import com.example.parcelorCourierService.Service.ParcelService;
 import com.example.parcelorCourierService.request.CreateParcelRequest;
+import com.example.parcelorCourierService.request.SenderEmailRequest;
 import com.example.parcelorCourierService.request.UpdateParcel;
 import com.example.parcelorCourierService.response.DeleteResponse;
 import com.example.parcelorCourierService.response.ParcelResponse;
@@ -128,10 +129,10 @@ public class ParcelController {
 
     //get users parcel
     @PostMapping("/me")
-    public  ResponseEntity<?> getUsersParcels(@RequestBody String email)
+    public  ResponseEntity<?> getUsersParcels(@RequestBody SenderEmailRequest request )
     {
         try {
-            List<ParcelResponse> parcels = parcelService.getUsersParcelBySenderEmail(email);
+            List<ParcelResponse> parcels = parcelService.getUsersParcelBySenderEmail(request.getEmail());
 
             if (parcels.isEmpty()) {
                 return new ResponseEntity<>("No parcels found for this email", HttpStatus.NOT_FOUND);

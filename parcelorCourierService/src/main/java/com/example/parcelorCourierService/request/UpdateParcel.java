@@ -14,10 +14,10 @@ public class UpdateParcel {
     private String recieverAddress;
 
     @Positive(message = "Cost must be greater than 0")
-    private double cost;
+    private Double cost;
 
     @Positive(message = "Weight must be greater than 0")
-    private double weight;
+    private Double weight;
 
     private String dimensions;
 

@@ -6,6 +6,7 @@ import com.example.userService.model.User;
 import com.example.userService.repository.UserRepository;
 import com.example.userService.request.CreateUserRequest;
 import com.example.userService.request.LoginRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class UserService {
 
@@ -80,7 +82,7 @@ public class UserService {
             // 1. Find user by email
             User user = userRepository.findByEmail(loginRequest.getEmail())
                     .orElseThrow(() -> new RuntimeException("Invalid email or password"));
-
+             System.out.println("user   " + user);
             // 2. Validate password
             boolean isPasswordCorrect = passwordEncoder.matches(
                     loginRequest.getPassword(),       // raw password

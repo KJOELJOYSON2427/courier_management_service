@@ -51,5 +51,5 @@ public class CreateParcelRequest {
     @NotBlank(message = "Dimensions field cannot be empty")
     private String dimensions;
 
-    private Long driverId; // optional
+
 }

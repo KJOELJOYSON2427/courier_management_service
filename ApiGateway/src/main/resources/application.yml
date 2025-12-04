@@ -1,6 +1,12 @@
-spring :
+spring:
   application:
-    name : gateway
+    name: gateway
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true   # allow lb://SERVICE-NAME from Eureka
 
 server:
   port: 8084
@@ -9,3 +15,15 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+
+security:
+  jwt:
+    secret-key: kjsdf78sdkf87sdf7sd8f7sd8f7w8ef7wef7
+    expiration: 86400000   # 24 hours
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    reactor.netty.http: DEBUG

@@ -4,7 +4,6 @@ import com.example.parcelorCourierService.Entity.Parcel;
 import com.example.parcelorCourierService.Entity.ParcelHistory;
 import com.example.parcelorCourierService.Entity.ParcelStatus;
 import com.example.parcelorCourierService.Entity.dto.ParcelDTO;
-import com.example.parcelorCourierService.Entity.dto.ParcelDtoMapper;
 import com.example.parcelorCourierService.Entity.dto.ParcelHistoryDto;
 import com.example.parcelorCourierService.repository.ParcelRepository;
 import com.example.parcelorCourierService.request.CreateParcelRequest;
@@ -170,30 +169,32 @@ public class ParcelService {
     //------>Frontend ---------
 
 
-     public void createParcel(CreateParcelRequest parcelRequest){
+public void createParcel(CreateParcelRequest parcelRequest) {
+    try {
+        Parcel parcel = new Parcel();
 
-        try{
-            Parcel parcel = new Parcel();
+        parcel.setTrackingNumber(parcelRequest.getTrackingNumber());
 
+        parcel.setSenderName(parcelRequest.getSenderName());
+        parcel.setSenderEmail(parcelRequest.getSenderEmail());
+        parcel.setSenderAddress(parcelRequest.getSenderAddress());
 
-            parcel.setTrackingNumber(parcelRequest.getTrackingNumber());
+        parcel.setReceiverEmail(parcelRequest.getReceiverEmail());
+        parcel.setRecieverName(parcelRequest.getRecieverName());
+        parcel.setRecieverAddress(parcelRequest.getRecieverAddress());
 
-            parcel.setSenderName(parcelRequest.getSenderName());
-            parcel.setSenderEmail(parcelRequest.getSenderEmail());
-            parcel.setSenderAddress(parcelRequest.getSenderAddress());
+        parcel.setCost(parcelRequest.getCost());
+        parcel.setSenderId(parcelRequest.getSenderId());
+        parcel.setWeight(parcelRequest.getWeight());
+        parcel.setDimensions(parcelRequest.getDimensions());
+        // ⭐️ THIS LINE SAVES TO DB ⭐️
+        parcelRepository.save(parcel);
 
-            parcel.setReceiverEmail(parcelRequest.getReceiverEmail());
-            parcel.setRecieverName(parcelRequest.getRecieverName());
-            parcel.setRecieverAddress(parcelRequest.getRecieverAddress());
+    } catch (Exception e) {
+        throw new RuntimeException(e);
+    }
+}
 
-            parcel.setCost(parcelRequest.getCost());
-            parcel.setSenderId(parcelRequest.getSenderId());
-            parcel.setWeight(parcelRequest.getWeight());
-            parcel.setDimensions(parcelRequest.getDimensions());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-     }
 
 
     // Get all Parcels sorted by createdAt (latest first)
@@ -207,48 +208,62 @@ public class ParcelService {
     }
 
     public ParcelResponse updateParcel(UpdateParcel updateParcel, String trackingNumber) {
-         try{
+        try {
+            Parcel parcel = parcelRepository.findByTrackingNumber(trackingNumber);
 
-             Parcel parcel =  parcelRepository.findByTrackingNumber(trackingNumber);
+            if (parcel == null) {
+                throw new RuntimeException("Parcel not found with tracking number: " + trackingNumber);
+            }
 
-             if (parcel == null) {
-                 throw new RuntimeException("Parcel not found with tracking number: " + trackingNumber);
-             }
+            // Update only provided fields
+            if (updateParcel.getReceiverEmail() != null)
+                parcel.setReceiverEmail(updateParcel.getReceiverEmail());
 
-             // Update fields
-             // Update fields
-             if (updateParcel.getReceiverEmail() != null) parcel.setReceiverEmail(updateParcel.getReceiverEmail());
-             if (updateParcel.getRecieverName() != null) parcel.setRecieverName(updateParcel.getRecieverName());
-             if (updateParcel.getRecieverAddress() != null) parcel.setRecieverAddress(updateParcel.getRecieverAddress());
-             if (updateParcel.getCost() > 0) parcel.setCost(updateParcel.getCost());
-             if (updateParcel.getWeight() > 0) parcel.setWeight(updateParcel.getWeight());
-             if (updateParcel.getDimensions() != null) parcel.setDimensions(updateParcel.getDimensions());
-             if (updateParcel.getDriverId() != null) parcel.setDriverId(updateParcel.getDriverId());
-             if (updateParcel.getStatus() != null) parcel.setStatus(ParcelStatus.valueOf(updateParcel.getStatus()));
+            if (updateParcel.getRecieverName() != null)
+                parcel.setRecieverName(updateParcel.getRecieverName());
 
-             parcelRepository.save(parcel);
+            if (updateParcel.getRecieverAddress() != null)
+                parcel.setRecieverAddress(updateParcel.getRecieverAddress());
 
+            if (updateParcel.getCost() != null && updateParcel.getCost() > 0)
+                parcel.setCost(updateParcel.getCost());
 
-             // Convert entity to response DTO
-             ParcelResponse response = new ParcelResponse();
-             response.setTrackingNumber(parcel.getTrackingNumber());
-             response.setSenderName(parcel.getSenderName());
-             response.setSenderEmail(parcel.getSenderEmail());
-             response.setSenderAddress(parcel.getSenderAddress());
-             response.setReceiverEmail(parcel.getReceiverEmail());
-             response.setRecieverName(parcel.getRecieverName());
-             response.setRecieverAddress(parcel.getRecieverAddress());
-             response.setCost(parcel.getCost());
-             response.setWeight(parcel.getWeight());
-             response.setDimensions(parcel.getDimensions());
-             response.setDriverId(parcel.getDriverId());
-             response.setStatus(parcel.getStatus().name());
-             response.setCreatedAt(parcel.getCreatedAt());
-             response.setUpdatedAt(parcel.getUpdatedAt());
-             return response;
-         }catch (Exception e){
-             throw new RuntimeException(e);
-         }
+            if (updateParcel.getWeight() != null && updateParcel.getWeight() > 0)
+                parcel.setWeight(updateParcel.getWeight());
+
+            if (updateParcel.getDimensions() != null)
+                parcel.setDimensions(updateParcel.getDimensions());
+
+            if (updateParcel.getDriverId() != null)
+                parcel.setDriverId(updateParcel.getDriverId());
+
+            if (updateParcel.getStatus() != null)
+                parcel.setStatus(ParcelStatus.valueOf(updateParcel.getStatus()));
+
+            parcelRepository.save(parcel);
+
+            // Convert to response DTO
+            ParcelResponse response = new ParcelResponse();
+            response.setTrackingNumber(parcel.getTrackingNumber());
+            response.setSenderName(parcel.getSenderName());
+            response.setSenderEmail(parcel.getSenderEmail());
+            response.setSenderAddress(parcel.getSenderAddress());
+            response.setReceiverEmail(parcel.getReceiverEmail());
+            response.setRecieverName(parcel.getRecieverName());
+            response.setRecieverAddress(parcel.getRecieverAddress());
+            response.setCost(parcel.getCost());
+            response.setWeight(parcel.getWeight());
+            response.setDimensions(parcel.getDimensions());
+            response.setDriverId(parcel.getDriverId());
+            response.setStatus(parcel.getStatus().name());
+            response.setCreatedAt(parcel.getCreatedAt());
+            response.setUpdatedAt(parcel.getUpdatedAt());
+
+            return response;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public ParcelResponse getOneParcel(String trackingNumber) {
@@ -286,9 +301,13 @@ public class ParcelService {
         }
     }
 
+    @Transactional
     public List<ParcelResponse> getUsersParcelBySenderEmail(String email) {
-        List<Parcel> parcels = parcelRepository.findBySenderEmail(email, Sort.by(Sort.Direction.DESC, "createdAt"));
+        System.out.println("Sender List --->" + email
+        );
 
+        List<Parcel> parcels = parcelRepository.findBySenderEmail(email.trim(), Sort.by(Sort.Direction.DESC, "createdAt"));
+        System.out.println("Parcel List --->" + parcels);
         List<ParcelResponse> responseList = new ArrayList<>();
 
         for (Parcel parcel : parcels){
