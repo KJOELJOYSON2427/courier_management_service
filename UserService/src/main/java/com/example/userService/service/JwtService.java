@@ -30,7 +30,7 @@ public class JwtService {
                 .setSubject(user.getEmail())     // main subject is usually email or username
                 .claim("id", user.getId())
                 .claim("role", user.getRole())
-                .claim("email", user.getEmail())
+
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
