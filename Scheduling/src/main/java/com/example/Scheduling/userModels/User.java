@@ -1,6 +1,14 @@
-package com.example.userService.model;
+package com.example.Scheduling.userModels;
 
 
+
+
+import jakarta.persistence.*;
+import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Data
 @Entity

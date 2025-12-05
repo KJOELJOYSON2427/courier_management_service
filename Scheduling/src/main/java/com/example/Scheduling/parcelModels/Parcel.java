@@ -1,5 +1,4 @@
-package com.example.parcelorCourierService.Entity;
-
+package com.example.Scheduling.parcelModels;
 
 import jakarta.persistence.*;
 import lombok.Data;
