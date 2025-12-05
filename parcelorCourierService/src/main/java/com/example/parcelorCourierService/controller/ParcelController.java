@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/parcel")
@@ -62,7 +63,8 @@ public class ParcelController {
     //---- For Frontend-----
     //ADD PARCEL
     @PostMapping("/")
-    public  ResponseEntity<?> createParcel( @Valid @RequestBody  CreateParcelRequest request){
+    public  ResponseEntity<?> createParcel(
+                                           @Valid @RequestBody  CreateParcelRequest request){
 
        try{
            parcelService.createParcel(request);
@@ -75,7 +77,19 @@ public class ParcelController {
 
     //Get All Parcels
     @GetMapping("/")
-    public ResponseEntity<?> getAllParcel(){
+    public ResponseEntity<?> getAllParcel(@RequestHeader Map<String, String> headers){
+        String userId = headers.get("x-user-id");
+        String email = headers.get("x-user-email");
+        String role = headers.get("x-user-role");
+        System.out.println("User with userId" + userId + "UserEmail" +email + " Role " + role);
+
+
+        // -------- ROLE VALIDATION --------
+        if (role == null || !role.equalsIgnoreCase("ADMIN")) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)   // 403
+                    .body("Unauthorized: Only ADMIN can access this resource");
+        }
         try {
             List<Parcel> parcels = parcelService.getAllParcel();
 
