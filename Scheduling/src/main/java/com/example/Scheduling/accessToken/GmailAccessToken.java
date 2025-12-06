@@ -25,8 +25,7 @@ public class GmailAccessToken {
         OAuth2AuthorizedClient client = clientService.loadAuthorizedClient(clientName, auth.getName());
         System.out.println("client --->" + client);
 
-        String accessToken = client.getAccessToken().getTokenValue();
-        return "Your Gmail Access Token: " + accessToken;
+        return client.getAccessToken().getTokenValue();
 
     }
 }

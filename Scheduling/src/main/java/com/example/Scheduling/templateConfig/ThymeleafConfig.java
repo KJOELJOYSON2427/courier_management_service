@@ -11,37 +11,34 @@ import org.thymeleaf.templateresolver.ITemplateResolver;
 @Configuration
 public class ThymeleafConfig {
     @Bean
-    @Description("Thymeleaf Template Resolver")
-    public ITemplateResolver templateResolver(){
+    public ITemplateResolver templateResolver() {
         SpringResourceTemplateResolver templateResolver = new SpringResourceTemplateResolver();
-        templateResolver.setPrefix("/WEB-INF/views/"); // folder where HTML templates are stored
-        templateResolver.setSuffix(".html");           // template file extension
-        templateResolver.setTemplateMode("HTML5");     // HTML5 templates
+        templateResolver.setPrefix("/WEB-INF/views/");
+        templateResolver.setSuffix(".html");
+        templateResolver.setTemplateMode("HTML5");
         templateResolver.setCharacterEncoding("UTF-8");
-        templateResolver.setCacheable(false);         // set true in production
+        templateResolver.setCacheable(false);
         return templateResolver;
-
     }
 
-    //2️⃣ Template Engine
     @Bean
-    @Description("Thymeleaf Template Engine")
-    public SpringTemplateEngine templateEngine(){
+    public SpringTemplateEngine templateEngine() {
         SpringTemplateEngine templateEngine = new SpringTemplateEngine();
         templateEngine.setTemplateResolver(templateResolver());
         return templateEngine;
     }
 
 
-    // 3️⃣ View Resolver
-    @Bean
-    public ThymeleafViewResolver viewResolver() {
-        ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
-        viewResolver.setTemplateEngine(templateEngine());
-        viewResolver.setCharacterEncoding("UTF-8");
-        viewResolver.setOrder(1);
-        return viewResolver;
-    }
+
+//    // 3️⃣ View Resolver
+//    @Bean
+//    public ThymeleafViewResolver viewResolver() {
+//        ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
+//        viewResolver.setTemplateEngine(templateEngine());
+//        viewResolver.setCharacterEncoding("UTF-8");
+//        viewResolver.setOrder(1);
+//        return viewResolver;
+//    }
 }
 
 

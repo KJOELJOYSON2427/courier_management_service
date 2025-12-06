@@ -1,13 +1,14 @@
 package com.example.Scheduling.Controller;
 
 import com.example.Scheduling.accessToken.GmailAccessToken;
+import com.example.Scheduling.dto.DeliveredEmailRequest;
 import com.example.Scheduling.service.GmailService;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class GmailController {
@@ -24,18 +25,46 @@ public class GmailController {
     public String readAccessToken(Authentication authentication) {
         OAuth2AuthenticationToken auth = (OAuth2AuthenticationToken) authentication;
         System.out.println("The read Mail " + gmailAccessService.getAccessToken(auth));
-        return gmailAccessService.getAccessToken(auth)
+        return gmailAccessService.getAccessToken(auth);
     }
 
-    @GetMapping("/send-email")
-    public String sendEmail(
+    // Hit this URL to send the email
+    @PostMapping("/send-delivered")
+    public ResponseEntity<?> sendDeliveredEmail(
             Authentication authentication,
-            @RequestParam String to,
-            @RequestParam String subject,
-            @RequestParam String body
-    )throws Exception {
-        OAuth2AuthenticationToken auth = (OAuth2AuthenticationToken) authentication;
-        String accessToken = gmailAccessService.getAccessToken(auth);
-        return gmailService.sendMail(auth, to, subject, body);
+            @RequestBody DeliveredEmailRequest request
+    ) {
+        try {
+            OAuth2AuthenticationToken auth = (OAuth2AuthenticationToken) authentication;
+            System.out.println("MCame in" + auth);
+
+            gmailService.sendDeliveredEmail(
+                    auth,
+                    request.getToEmail(),
+                    request.getSenderName(),
+                    request.getFrom(),
+                    request.getTo(),
+                    request.getRecipientName(),
+                    request.getCost(),
+                    request.getWeight(),
+                    request.getNote()
+            );
+            return ResponseEntity.ok("Email sent successfully!");
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Internal Error");
+        }
     }
+
+    // Hit this URL to send the email
+    @PostMapping("/send-welcome")
+    public ResponseEntity<?> sendWelcomeEmail(
+            Authentication authentication,
+            @RequestBody WelcomeEmailRequest request
+    ){
+        OAuth2AuthenticationToken auth = (OAuth2AuthenticationToken) authentication;
+        System.out.println("MCame in" + auth);
+          gmailService.sendWelcomeEmail(request);
+    }
+
 }
