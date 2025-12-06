@@ -5,6 +5,23 @@ spring:
   application:
     name: BackendServices
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 685348661660-99t89lqq95fkaoi90qnm29sgf6ggulsf.apps.googleusercontent.com
+            client-secret: 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
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - email
+              - profile
+              - openid
+              - https://www.googleapis.com/auth/gmail.readonly
+        provider:
+          google:
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+
   datasource:
     primary:
       jdbc-url: jdbc:postgresql://localhost:5432/userdb
