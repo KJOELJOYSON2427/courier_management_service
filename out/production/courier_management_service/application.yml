@@ -11,7 +11,7 @@ spring:
         registration:
           google:
             client-id: 685348661660-99t89lqq95fkaoi90qnm29sgf6ggulsf.apps.googleusercontent.com
-            client-secret:
+            client-secret: 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
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             scope:
               - email
@@ -21,7 +21,6 @@ spring:
               - https://www.googleapis.com/auth/gmail.send
               - https://www.googleapis.com/auth/userinfo.email
               - https://www.googleapis.com/auth/userinfo.profile
-
         provider:
           google:
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
@@ -39,12 +38,6 @@ spring:
       password: joel.2427
       driver-class-name: org.postgresql.Driver
 
-    gmaildb:
-      jdbc-url: jdbc:postgresql://localhost:5432/gmaildb
-      username: postgres
-      password: joel.2427
-      driver-class-name: org.postgresql.Driver
-
   jpa:
     show-sql: true
     hibernate:
@@ -57,9 +50,3 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
-
-gmail:
-  client-id: 685348661660-99t89lqq95fkaoi90qnm29sgf6ggulsf.apps.googleusercontent.com
-  client-secret: 
-  redirect-uri: http://localhost:8085/login/oauth2/code/google
-  from: yhhj8036@gmail.com

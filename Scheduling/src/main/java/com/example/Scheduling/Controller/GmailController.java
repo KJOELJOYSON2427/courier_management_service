@@ -56,15 +56,15 @@ public class GmailController {
         }
     }
 
-    // Hit this URL to send the email
-    @PostMapping("/send-welcome")
-    public ResponseEntity<?> sendWelcomeEmail(
-            Authentication authentication,
-            @RequestBody WelcomeEmailRequest request
-    ){
-        OAuth2AuthenticationToken auth = (OAuth2AuthenticationToken) authentication;
-        System.out.println("MCame in" + auth);
-          gmailService.sendWelcomeEmail(request);
-    }
+//    // Hit this URL to send the email
+//    @PostMapping("/send-welcome")
+//    public ResponseEntity<?> sendWelcomeEmail(
+//            Authentication authentication,
+//            @RequestBody WelcomeEmailRequest request
+//    ){
+//        OAuth2AuthenticationToken auth = (OAuth2AuthenticationToken) authentication;
+//        System.out.println("MCame in" + auth);
+//          gmailService.sendWelcomeEmail(request);
+//    }
 
 }

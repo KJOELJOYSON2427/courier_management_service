@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    @Query("SELECT u from users u WHERE u.status = 0")
+    @Query("SELECT u FROM User u WHERE u.status = 0")
     List<User> findByStatus();
 
 }

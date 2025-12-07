@@ -1,14 +1,17 @@
 package com.example.Scheduling.service;
 
 import com.example.Scheduling.accessToken.GmailAccessToken;
+import com.example.Scheduling.refresh_token.GmailRefreshTokenForSheduler;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.Message;
 import jakarta.mail.Session;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Service;
 import com.google.api.client.json.gson.GsonFactory;
@@ -17,17 +20,21 @@ import org.thymeleaf.context.Context;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Base64;
+import java.util.Map;
 import java.util.Properties;
 
 @Service
 public class GmailService {
 
+    @Value("${gmail.from}")
+    private String fromEmail;
     private final TemplateEngine templateEngine;
     private final GmailAccessToken gmailTokenService;
-
-    public GmailService(GmailAccessToken gmailTokenService, TemplateEngine templateEngine) {
+    private final GmailRefreshTokenForSheduler tokenService;
+    public GmailService(GmailAccessToken gmailTokenService, GmailRefreshTokenForSheduler tokenService, TemplateEngine templateEngine) {
         this.gmailTokenService = gmailTokenService;
         this.templateEngine = templateEngine;
+        this.tokenService = tokenService;
     }
 
     public void sendDeliveredEmail(
@@ -109,8 +116,56 @@ public class GmailService {
         return message;
     }
 
-    public void sendWelcomeEmail(String email, String fullName) {
+    public void sendWelcomeEmail(String toEmail,
+                                 String subject,
+                                 String templateName,
+                                 Map<String, Object> model){
+         try {
+             // 1️⃣ LOAD VALID ACCESS TOKEN
+             String accessToken = tokenService.getValidAccessToken();
+
+             // 2️⃣ RENDER THYMELEAF TEMPLATE
+             Context ctx = new Context();
 
 
-    }
+             model.forEach(ctx::setVariable);
+
+             String html = templateEngine.process(templateName, ctx);
+
+             // 3️⃣ Build MimeMessage
+             MimeMessage email = createEmail(
+                     toEmail,
+                     fromEmail,
+                     subject,
+                     html
+             );
+
+             // 4️⃣ Convert to Gmail Message
+             Message gmailMessage = createMessageWithEmail(email);
+
+
+             // 5️⃣ Build Gmail client using refreshed token
+             Gmail gmailService = new Gmail.Builder(
+                     new NetHttpTransport(),
+                     new GsonFactory(),
+                     request -> {
+                         request.getHeaders().setAuthorization("Bearer " + accessToken);
+                     }
+             ).setApplicationName("SendIt Courier").build();
+             // 6️⃣ SEND EMAIL 🎉
+             gmailService
+                     .users()
+                     .messages()
+                     .send("me", gmailMessage)
+                     .execute();
+
+             System.out.println("✅ Welcome email sent to: " + toEmail);
+
+         } catch (Exception e) {
+             e.printStackTrace();
+             throw new RuntimeException("❌ Failed to send Welcome Email");
+         }
+
+
+}
 }
