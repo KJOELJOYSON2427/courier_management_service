@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class Scheduler {
@@ -27,12 +28,15 @@ public class Scheduler {
            return recentCreatedUser;
        }
 
-    @Scheduled(fixedRate = 3000000)
+    @Scheduled(fixedRate = 30000)
     public void sendWelcomeEmails() {
       List<User>  newUsers = findStatusWithDefaultValue();
 
       for(User u: newUsers){
-           gmailService.sendWelcomeEmail(u.getEmail(),u.getFullName());
+           gmailService.sendWelcomeEmail(u.getEmail(),
+                   "Welcome to SendIt Courier",
+                   "welcome",
+                   Map.of("name", u.getFullName(),"email",u.getEmail()));
           u.setStatus(1);
           userRepository.save(u);
       }
