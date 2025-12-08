@@ -1,4 +1,6 @@
-package com.example.userService.model;
+package com.example.Scheduling.userModels;
+
+
 
 
 import jakarta.persistence.*;
@@ -7,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+
 
 @Data
 @Entity
@@ -17,7 +20,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "full_name", nullable = false)
     private String fullName;
 
     @Column(nullable = false)
@@ -25,7 +28,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role = Role.USER;  // Default USER
+    private Role role = Role.USER;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -40,21 +43,23 @@ public class User {
 
     private String note;
 
+    @Column(name = "feed_back")
     private String feedBack;
+
     @Column(nullable = false)
-    private int status = 0;  // Default 0
+    private int status = 0;
+
     @CreationTimestamp
-    @Column(updatable = false)
-    private LocalDateTime createdAt;   // Automatically set on insert
+    @Column(updatable = false, name = "created_at")
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    private LocalDateTime updatedAt;   // Automatically updated on update
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
-   public User(){
-   }
+    public User() {}
 
     public User(String fullName, String password, String email, String country, String address, Integer age) {
-
         this.fullName = fullName;
         this.password = password;
         this.email = email;
@@ -63,4 +68,3 @@ public class User {
         this.age = age;
     }
 }
-

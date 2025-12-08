@@ -1,0 +1,52 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: BackendServices
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 685348661660-99t89lqq95fkaoi90qnm29sgf6ggulsf.apps.googleusercontent.com
+            client-secret: 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
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - email
+              - profile
+              - openid
+              - https://www.googleapis.com/auth/gmail.readonly
+              - https://www.googleapis.com/auth/gmail.send
+              - https://www.googleapis.com/auth/userinfo.email
+              - https://www.googleapis.com/auth/userinfo.profile
+        provider:
+          google:
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+
+  datasource:
+    primary:
+      jdbc-url: jdbc:postgresql://localhost:5432/userdb
+      username: postgres
+      password: joel.2427
+      driver-class-name: org.postgresql.Driver
+
+    secondary:
+      jdbc-url: jdbc:postgresql://localhost:5432/courierdb
+      username: postgres
+      password: joel.2427
+      driver-class-name: org.postgresql.Driver
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
