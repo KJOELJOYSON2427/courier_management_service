@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -16,10 +17,16 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/oauth2/**").permitAll()
+                        .requestMatchers("/", "/login","/gmail/send-delivered","/oauth2/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth -> oauth.successHandler(successHandler));
+                .csrf(AbstractHttpConfigurer::disable)
+                .oauth2Login(oauth -> oauth.successHandler(successHandler)
+                        .tokenEndpoint(token -> token
+                                // Use the custom client to log Google’s token response
+                                .accessTokenResponseClient(new LoggingOAuth2AccessTokenResponseClient())
+                        )
+                );
 
         return http.build();
     }

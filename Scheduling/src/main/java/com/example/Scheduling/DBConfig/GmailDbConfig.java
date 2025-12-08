@@ -15,6 +15,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
+import java.util.Map;
 
 @Configuration
 @EnableTransactionManagement
@@ -26,7 +27,7 @@ import javax.sql.DataSource;
 public class GmailDbConfig {
 
     @Bean
-    @ConfigurationProperties("spring.datasource.secondary")
+    @ConfigurationProperties("spring.datasource.gmaildb")
     public DataSource gmailDataSource() {
         return DataSourceBuilder.create().build();
     }
@@ -38,7 +39,12 @@ public class GmailDbConfig {
     ) {
         return builder
                 .dataSource(gmailDataSource())
+
                 .packages("com.example.Scheduling.gmailToken") // your GmailToken entity package
+                .properties(Map.of(
+                        "hibernate.hbm2ddl.auto", "update",   // <<< CREATE TABLES AUTOMATICALLY
+                        "hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect"
+                ))
                 .persistenceUnit("gmail")
                 .build();
     }

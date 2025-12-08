@@ -28,15 +28,15 @@ public class Scheduler {
            return recentCreatedUser;
        }
 
-    @Scheduled(fixedRate = 300000)
+    @Scheduled(fixedRate = 30000)
     public void sendWelcomeEmails() {
       List<User>  newUsers = findStatusWithDefaultValue();
 
       for(User u: newUsers){
            gmailService.sendWelcomeEmail(u.getEmail(),
                    "Welcome to SendIt Courier",
-                   "Welcome", // template name
-                   Map.of("name", u.getFullName()));
+                   "welcome",
+                   Map.of("name", u.getFullName(),"email",u.getEmail()));
           u.setStatus(1);
           userRepository.save(u);
       }

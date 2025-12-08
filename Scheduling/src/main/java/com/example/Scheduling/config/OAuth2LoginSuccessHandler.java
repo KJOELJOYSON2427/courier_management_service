@@ -12,6 +12,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Instant;
 
 @Component
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
@@ -35,14 +36,31 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                         authToken.getAuthorizedClientRegistrationId(),
                         authToken.getName()
                 );
+        System.out.println("=== GOOGLE TOKEN DETAILS ===");
+
+        System.out.println("Client Registration ID: " + client.getClientRegistration().getRegistrationId());
+
+        System.out.println("Access Token Value: " + client.getAccessToken().getTokenValue());
+        System.out.println("Access Token Scopes: " + client.getAccessToken().getScopes());
+        System.out.println("Access Token Issued At: " + client.getAccessToken().getIssuedAt());
+        System.out.println("Access Token Expires At: " + client.getAccessToken().getExpiresAt());
+
+        if (client.getRefreshToken() != null) {
+            System.out.println("Refresh Token Value: " + client.getRefreshToken().getTokenValue());
+            System.out.println("Refresh Token Issued At: " + client.getRefreshToken().getIssuedAt());
+        } else {
+            System.out.println("Refresh Token: NULL");
+        }
+
+        System.out.println("=== GOOGLE OAUTH DETAILS END ===");
 
         String accessToken = client.getAccessToken().getTokenValue();
 
         String refreshToken = client.getRefreshToken() != null
                 ? client.getRefreshToken().getTokenValue()
                 :null;
-
-        gmailTokenService.saveTokens(accessToken, refreshToken);
+        Instant expiryTime = client.getAccessToken().getExpiresAt();
+        gmailTokenService.saveTokens(accessToken, refreshToken, expiryTime);
 
         response.sendRedirect("/home");
     }

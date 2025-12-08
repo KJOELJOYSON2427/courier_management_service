@@ -1,5 +1,6 @@
 package com.example.Scheduling.service;
 
+import com.example.Scheduling.CronJob.GmailProperties;
 import com.example.Scheduling.accessToken.GmailAccessToken;
 import com.example.Scheduling.refresh_token.GmailRefreshTokenForSheduler;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
@@ -26,19 +27,17 @@ import java.util.Properties;
 @Service
 public class GmailService {
 
-    @Value("${gmail.from}")
-    private String fromEmail;
     private final TemplateEngine templateEngine;
-    private final GmailAccessToken gmailTokenService;
+
     private final GmailRefreshTokenForSheduler tokenService;
-    public GmailService(GmailAccessToken gmailTokenService, GmailRefreshTokenForSheduler tokenService, TemplateEngine templateEngine) {
-        this.gmailTokenService = gmailTokenService;
+    public GmailService(GmailRefreshTokenForSheduler tokenService, TemplateEngine templateEngine) {
+
+
         this.templateEngine = templateEngine;
         this.tokenService = tokenService;
     }
 
     public void sendDeliveredEmail(
-            OAuth2AuthenticationToken auth,
             String toEmail,
             String senderName,
             String from,
@@ -49,9 +48,10 @@ public class GmailService {
             String note
     ) throws Exception {
 
-        // 1️⃣ Raw access token
-        String accessToken = gmailTokenService.getAccessToken(auth);
-         System.out.println("Acess in " +accessToken);
+        // 1️⃣ Get valid token (refreshes if expired)
+        String accessToken = tokenService.getValidAccessToken();
+        System.out.println("Using Access Token = " + accessToken);
+
         // 2️⃣ Transport
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
 
@@ -65,7 +65,7 @@ public class GmailService {
                 initializer
         ).setApplicationName("SendIt Courier").build();
 
-        // 4️⃣ Thymeleaf Template
+        // 4️⃣ Template
         Context ctx = new Context();
         ctx.setVariable("sendername", senderName);
         ctx.setVariable("from", from);
@@ -75,35 +75,49 @@ public class GmailService {
         ctx.setVariable("weight", weight);
         ctx.setVariable("note", note);
 
-        String html = templateEngine.process("delivered", ctx);
-        System.out.println("email ids about to send");
-        // 5️⃣ Email creation
+        String html = templateEngine.process("deliveredParcelEmail", ctx);
+
+        // 5️⃣ Email
         MimeMessage email = createEmail(toEmail, "me", "Your Parcel Has Been Delivered", html);
 
-        // 6️⃣ Convert to Gmail API format
+        // 6️⃣ Convert & Send
         Message message = createMessageWithEmail(email);
-        System.out.println("email ids about to gmail server");
-
-        // 7️⃣ Send!
         gmail.users().messages().send("me", message).execute();
-        System.out.println("Message is created"+ message);
 
         System.out.println("✔ EMAIL SENT SUCCESSFULLY!");
     }
 
 
+
     private MimeMessage createEmail(String to, String from, String subject, String bodyHtml) throws Exception {
+
+
         Session session = Session.getDefaultInstance(new Properties(), null);
 
+        String cleanTo = to == null ? "" : to.trim();
+        String cleanFrom = from == null ? "" : from.trim();
+
+        System.out.println("Clean To after trim: [" + cleanTo + "]");
+
+        // Validate email
+        if (!cleanTo.contains("@")) {
+            throw new IllegalArgumentException("❌ Invalid 'To' email: " + cleanTo);
+        }
+        if (cleanFrom.equals("me")) {
+            cleanFrom = "yhhj8036@gmail.com";  // YOUR Gmail API account
+        }
+
         MimeMessage message = new MimeMessage(session);
-        message.setFrom(new InternetAddress(from));
-        message.addRecipient(jakarta.mail.Message.RecipientType.TO, new InternetAddress(to));
+        message.setFrom(new InternetAddress(cleanFrom));
+        message.addRecipient(jakarta.mail.Message.RecipientType.TO, new InternetAddress(cleanTo));
         message.setSubject(subject, "UTF-8");
         message.setContent(bodyHtml, "text/html; charset=UTF-8");
-        System.out.println("Message is created"+ message);
+
+        System.out.println("Message is created " + message);
 
         return message;
     }
+
 
     private Message createMessageWithEmail(MimeMessage email) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -135,7 +149,7 @@ public class GmailService {
              // 3️⃣ Build MimeMessage
              MimeMessage email = createEmail(
                      toEmail,
-                     fromEmail,
+                     "me",  // use me so Gmail API uses authenticated account
                      subject,
                      html
              );

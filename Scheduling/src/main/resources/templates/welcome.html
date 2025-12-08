@@ -66,11 +66,11 @@
     </div>
 
     <div class="email-body">
-        <p>Hello <span th:text="${fullname}">User</span>,</p>
+        <p>Hello <span th:text="${name}">User</span>,</p>
 
         <p>Your login credentials:</p>
         <p>Email: <strong th:text="${email}">user@example.com</strong></p>
-        <p>Password: <strong th:text="${password}">your-password-here</strong></p>
+
 
         <p>To login go to:
             <a th:href="@{${loginUrl}(login='login')}">

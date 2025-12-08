@@ -1,5 +1,6 @@
 package com.example.Scheduling.refresh_token;
 
+import com.example.Scheduling.CronJob.GmailProperties;
 import com.example.Scheduling.gmailRepo.GmailTokenRepository;
 import com.example.Scheduling.gmailToken.GmailToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleRefreshTokenRequest;
@@ -9,22 +10,18 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+
 @Service
 public class GmailRefreshTokenForSheduler {
 
     private final GmailTokenRepository repo;
+    private final GmailProperties gmailProperties;
 
-    @Value("${gmail.client-id}")
-    private String clientId;
 
-    @Value("${gmail.client-secret}")
-    private String clientSecret;
-
-    @Value("${gmail.redirect-uri}")
-    private String redirectUri;
-
-    public GmailRefreshTokenForSheduler(GmailTokenRepository repo) {
+    public GmailRefreshTokenForSheduler(GmailTokenRepository repo, GmailProperties gmailProperties) {
         this.repo = repo;
+        this.gmailProperties = gmailProperties;
     }
 
     public String getValidAccessToken() throws Exception {
@@ -53,8 +50,8 @@ public class GmailRefreshTokenForSheduler {
                         new NetHttpTransport(),
                         new GsonFactory(),
                         tokenObj.getRefreshToken(),
-                        clientId,
-                        clientSecret
+                        gmailProperties.getClientId(),
+                        gmailProperties.getClientSecret()
                 ).execute();
 
         String newAccessToken = response.getAccessToken();
@@ -73,10 +70,12 @@ public class GmailRefreshTokenForSheduler {
     }
 
 
-    public void saveTokens(String access, String refresh) {
+    public void saveTokens(String access, String refresh, Instant expirty) {
         GmailToken token = repo.findById(1L).orElse(new GmailToken());
         token.setAccessToken(access);
+
         if (refresh != null) token.setRefreshToken(refresh);
+        token.setExpiryTimeMillis(expirty.toEpochMilli());
         repo.save(token);
 
         System.out.println("🔥 Gmail OAuth tokens saved!");

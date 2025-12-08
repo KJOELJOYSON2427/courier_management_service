@@ -6,11 +6,12 @@ import com.example.Scheduling.service.GmailService;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/gmail")
 public class GmailController {
 
     private final GmailAccessToken gmailAccessService;
@@ -31,15 +32,11 @@ public class GmailController {
     // Hit this URL to send the email
     @PostMapping("/send-delivered")
     public ResponseEntity<?> sendDeliveredEmail(
-            Authentication authentication,
             @RequestBody DeliveredEmailRequest request
     ) {
         try {
-            OAuth2AuthenticationToken auth = (OAuth2AuthenticationToken) authentication;
-            System.out.println("MCame in" + auth);
-
+            System.out.println("delivered Mail" + request.toString());
             gmailService.sendDeliveredEmail(
-                    auth,
                     request.getToEmail(),
                     request.getSenderName(),
                     request.getFrom(),
