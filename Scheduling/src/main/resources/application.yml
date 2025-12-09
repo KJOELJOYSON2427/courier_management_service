@@ -11,7 +11,7 @@ spring:
         registration:
           google:
             client-id: 685348661660-99t89lqq95fkaoi90qnm29sgf6ggulsf.apps.googleusercontent.com
-            client-secret: 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
+            client-secret:
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             authorization-grant-type: authorization_code
             client-authentication-method: client_secret_basic
@@ -64,6 +64,6 @@ eureka:
 
 gmail:
   client-id: 685348661660-99t89lqq95fkaoi90qnm29sgf6ggulsf.apps.googleusercontent.com
-  client-secret: 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
+  client-secret:
   redirect-uri: http://localhost:8085/login/oauth2/code/google
   from: yhhj8036@gmail.com
