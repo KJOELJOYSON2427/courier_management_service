@@ -8,6 +8,7 @@ import com.example.parcelorCourierService.Entity.dto.ParcelHistoryDto;
 import com.example.parcelorCourierService.repository.ParcelRepository;
 import com.example.parcelorCourierService.request.CreateParcelRequest;
 
+import com.example.parcelorCourierService.request.ParcelStatusUpdateRequest;
 import com.example.parcelorCourierService.request.UpdateParcel;
 import com.example.parcelorCourierService.response.DeleteResponse;
 import com.example.parcelorCourierService.response.ParcelResponse;
@@ -234,8 +235,7 @@ public void createParcel(CreateParcelRequest parcelRequest) {
             if (updateParcel.getDimensions() != null)
                 parcel.setDimensions(updateParcel.getDimensions());
 
-            if (updateParcel.getDriverId() != null)
-                parcel.setDriverId(updateParcel.getDriverId());
+
 
             if (updateParcel.getStatus() != null)
                 parcel.setStatus(ParcelStatus.valueOf(updateParcel.getStatus()));
@@ -254,7 +254,6 @@ public void createParcel(CreateParcelRequest parcelRequest) {
             response.setCost(parcel.getCost());
             response.setWeight(parcel.getWeight());
             response.setDimensions(parcel.getDimensions());
-            response.setDriverId(parcel.getDriverId());
             response.setStatus(parcel.getStatus().name());
             response.setCreatedAt(parcel.getCreatedAt());
             response.setUpdatedAt(parcel.getUpdatedAt());
@@ -287,7 +286,6 @@ public void createParcel(CreateParcelRequest parcelRequest) {
             response.setCost(parcel.getCost());
             response.setWeight(parcel.getWeight());
             response.setDimensions(parcel.getDimensions());
-            response.setDriverId(parcel.getDriverId());
             response.setStatus(parcel.getStatus().name());
             response.setCreatedAt(parcel.getCreatedAt());
             response.setUpdatedAt(parcel.getUpdatedAt());
@@ -322,7 +320,6 @@ public void createParcel(CreateParcelRequest parcelRequest) {
             response.setCost(parcel.getCost());
             response.setWeight(parcel.getWeight());
             response.setDimensions(parcel.getDimensions());
-            response.setDriverId(parcel.getDriverId());
             response.setStatus(parcel.getStatus().name());
             response.setCreatedAt(parcel.getCreatedAt());
             response.setUpdatedAt(parcel.getUpdatedAt());
@@ -353,4 +350,36 @@ public void createParcel(CreateParcelRequest parcelRequest) {
             throw new RuntimeException("Failed to delete parcel: " + e.getMessage(), e);
         }
     }
+
+
+
+    public void updateParcelState(String trackingNumber, ParcelStatusUpdateRequest req) {
+
+        Parcel parcel = parcelRepository.findByTrackingNumber(trackingNumber);
+
+        if (parcel == null)
+            throw new RuntimeException("Parcel not found: " + trackingNumber);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // Mark Picked Up (set only if not already set)
+        if (Boolean.TRUE.equals(req.getPickedUp()) && parcel.getPickedUpByCourierAt() == null) {
+            parcel.setPickedUpByCourierAt(now);
+        }
+
+        // Mark Out For Delivery
+        if (Boolean.TRUE.equals(req.getOutForDelivery()) && parcel.getOutForDeliveryAt() == null) {
+            parcel.setOutForDeliveryAt(now);
+        }
+
+        // Mark Delivered
+        if (Boolean.TRUE.equals(req.getDelivered()) && parcel.getDeliveredAt() == null) {
+            parcel.setDeliveredAt(now);
+        }
+
+        parcelRepository.save(parcel);
+    }
+
+
+
 }

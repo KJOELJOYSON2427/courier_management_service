@@ -53,27 +53,27 @@ public class UserService {
         return new UserResponse(userRes.getId(), userRes.getEmail(), user.getFullName());
     }
 
-    @Bean
-    CommandLineRunner init(UserRepository repo) {
-        return args -> {
-            if (!repo.existsByEmail("parcel@joel")) {
-
-                BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
-                User user = new User(
-                        "parcel@joel",
-                        encoder.encode("yourPassword123"),
-                        "parcel@joel",
-                        "india",
-                        "Some address",
-                        22
-                );
-
-                repo.save(user);
-                System.out.println("Test user created: parcel@joel");
-            }
-        };
-    }
+//    @Bean
+//    CommandLineRunner init(UserRepository repo) {
+//        return args -> {
+//            if (!repo.existsByEmail("parcel@joel")) {
+//
+//                BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+//
+//                User user = new User(
+//                        "parcel@joel",
+//                        encoder.encode("yourPassword123"),
+//                        "parcel@joel",
+//                        "india",
+//                        "Some address",
+//                        22
+//                );
+//
+//                repo.save(user);
+//                System.out.println("Test user created: parcel@joel");
+//            }
+//        };
+//    }
 
 
     public LoginResponse loginUser(LoginRequest loginRequest) {

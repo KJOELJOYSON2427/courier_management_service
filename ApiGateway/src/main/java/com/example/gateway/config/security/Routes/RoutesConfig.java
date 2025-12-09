@@ -28,8 +28,12 @@ public class RoutesConfig {
                         .filters(f -> f.stripPrefix(2))  // remove /api/v1
                         .uri("lb://user-service")
                 )
-
-
+                // 👤 Auth / User Service Route
+                .route("BackendServices", r -> r
+                        .path("/api/v1/gmail/**")
+                        .filters(f -> f.stripPrefix(2))  // remove /api/v1
+                        .uri("lb://BackendServices")
+                )
                 .build();
     }
 

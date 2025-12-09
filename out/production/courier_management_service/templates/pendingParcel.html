@@ -1,0 +1,290 @@
+```html
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Parcel - Action Required</title>
+    <style type="text/css">
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Poppins', Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .email-container {
+            max-width: 650px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255,255,255,0.1);
+            transform: rotate(30deg);
+            animation: shine 6s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(30deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(30deg); }
+            100% { transform: translateX(-100%) translateY(-100%) rotate(30deg); }
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            background: #ff6b6b;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 20px 0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255,107,107,0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255,107,107,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,107,107,0); }
+        }
+
+        .content {
+            padding: 40px 30px;
+            background: #fff;
+        }
+
+        .parcel-card {
+            background-color: #E9EB77;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            border-left: 5px solid #2a5298;
+            animation: slideInLeft 0.8s ease-out 0.3s both;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px dashed #ddd;
+            font-size: 16px;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            color: #1e3c72;
+            font-size: 17px;
+        }
+
+        .label {
+            font-weight: 600;
+            color: #1e3c72;
+        }
+
+        .value {
+            text-align: right;
+            color: #333;
+        }
+
+        .hero-image {
+            text-align: center;
+            margin: 30px 0;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .hero-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 15px;
+            color: #856404;
+            margin: 25px 0;
+            animation: fadeIn 1s ease-out 0.6s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .footer {
+            background: #1e1e1e;
+            color: #aaa;
+            text-align: center;
+            padding: 30px;
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: #4dabf7;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .email-container {
+                margin: 10px;
+                border-radius: 12px;
+            }
+            .content, .header {
+                padding: 25px 20px;
+            }
+            .detail-row {
+                flex-direction: column;
+            }
+            .value {
+                text-align: left;
+                margin-top: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <!-- Header -->
+    <div class="header">
+        <h1>Pending Parcel Alert</h1>
+        <p>A new parcel is waiting for your action</p>
+        <div class="status-badge">Pending</div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+        <p>Hello <strong th:text="${sendername}"></strong>,</p>
+        <p>You have a parcel that requires attention. Please review the details below:</p>
+
+        <div class="parcel-card">
+            <div class="detail-row">
+                <span class="label">From:</span>
+                <span class="value" th:text="${from}"></span>
+            </div>
+            <div class="detail-row">
+                <span class="label">To:</span>
+                <span class="value" th:text="${to}"></span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Sender:</span>
+                <span class="value" th:text="${sendername}"></span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Recipient:</span>
+                <span class="value" th:text="${recipientname}"></span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Cost:</span>
+                <span class="value">$ <span th:text="${cost}"></span></span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Weight:</span>
+                <span class="value" th:text="${weight} + ' kg'"></span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Note:</span>
+                <span class="value" th:text="${note} ?: 'No note provided'"></span>
+            </div>
+        </div>
+
+        <div class="hero-image">
+            <img src="https://res.cloudinary.com/dap91fhxh/image/upload/v1717495157/hero_r5lgvq.png"
+                 alt="Parcel Delivery" height="250" width="500">
+        </div>
+
+        <div class="note">
+            <strong>Important:</strong> If you did not send or expect this parcel, please ignore this email or contact us immediately.
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Need help? Contact our support team at
+            <a href="mailto:sendit@outlook.com">sendit@outlook.com</a>
+        </p>
+        <p style="margin-top: 15px; color: #666; font-size: 12px;">
+            © 2025 SendIt Logistics. All rights reserved.
+        </p>
+    </div>
+</div>
+</body>
+</html>

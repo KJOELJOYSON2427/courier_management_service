@@ -29,29 +29,29 @@ public class GmailController {
         return gmailAccessService.getAccessToken(auth);
     }
 
-    // Hit this URL to send the email
-    @PostMapping("/send-delivered")
-    public ResponseEntity<?> sendDeliveredEmail(
-            @RequestBody DeliveredEmailRequest request
-    ) {
-        try {
-            System.out.println("delivered Mail" + request.toString());
-            gmailService.sendDeliveredEmail(
-                    request.getToEmail(),
-                    request.getSenderName(),
-                    request.getFrom(),
-                    request.getTo(),
-                    request.getRecipientName(),
-                    request.getCost(),
-                    request.getWeight(),
-                    request.getNote()
-            );
-            return ResponseEntity.ok("Email sent successfully!");
-
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Internal Error");
-        }
-    }
+//    // Hit this URL to send the email
+//    @PostMapping("/send-delivered")
+//    public ResponseEntity<?> sendDeliveredEmail(
+//            @RequestBody DeliveredEmailRequest request
+//    ) {
+//        try {
+//            System.out.println("delivered Mail" + request.toString());
+//            gmailService.sendDeliveredEmail(
+//                    request.getToEmail(),
+//                    request.getSenderName(),
+//                    request.getFrom(),
+//                    request.getTo(),
+//                    request.getRecipientName(),
+//                    request.getCost(),
+//                    request.getWeight(),
+//                    request.getNote()
+//            );
+//            return ResponseEntity.ok("Email sent successfully!");
+//
+//        } catch (Exception e) {
+//            return ResponseEntity.status(500).body("Internal Error");
+//        }
+//    }
 
 //    // Hit this URL to send the email
 //    @PostMapping("/send-welcome")

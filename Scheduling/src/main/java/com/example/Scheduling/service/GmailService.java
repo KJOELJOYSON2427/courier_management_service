@@ -2,6 +2,7 @@ package com.example.Scheduling.service;
 
 import com.example.Scheduling.CronJob.GmailProperties;
 import com.example.Scheduling.accessToken.GmailAccessToken;
+import com.example.Scheduling.parcelModels.Parcel;
 import com.example.Scheduling.refresh_token.GmailRefreshTokenForSheduler;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpRequestInitializer;
@@ -38,14 +39,7 @@ public class GmailService {
     }
 
     public void sendDeliveredEmail(
-            String toEmail,
-            String senderName,
-            String from,
-            String to,
-            String recipientName,
-            double cost,
-            String weight,
-            String note
+            Parcel parcel
     ) throws Exception {
 
         // 1️⃣ Get valid token (refreshes if expired)
@@ -67,25 +61,118 @@ public class GmailService {
 
         // 4️⃣ Template
         Context ctx = new Context();
-        ctx.setVariable("sendername", senderName);
-        ctx.setVariable("from", from);
-        ctx.setVariable("to", to);
-        ctx.setVariable("recipientname", recipientName);
-        ctx.setVariable("cost", cost);
-        ctx.setVariable("weight", weight);
-        ctx.setVariable("note", note);
+        ctx.setVariable("sendername", parcel.getSenderName());
+        ctx.setVariable("from", parcel.getSenderAddress());
+        ctx.setVariable("to", parcel.getRecieverAddress());
+        ctx.setVariable("recipientname", parcel.getRecieverName());
+        ctx.setVariable("cost", parcel.getCost());
+        ctx.setVariable("weight", parcel.getWeight());
 
         String html = templateEngine.process("deliveredParcelEmail", ctx);
 
         // 5️⃣ Email
-        MimeMessage email = createEmail(toEmail, "me", "Your Parcel Has Been Delivered", html);
+        MimeMessage SenderEmailMessage = createEmail(
+                parcel.getSenderEmail(),
+                "me",
+                "Your Parcel Has Been Delivered",
+                html
+        );
+        // 5️⃣ Email
+        MimeMessage RecieverEmailMessage = createEmail(
+                parcel.getReceiverEmail(),
+                "me",
+                "Your parcel was successfully delivered!",
+                html
+        );
+        System.out.println("Delivery confirmation sent for parcel: " + parcel.getId());
 
         // 6️⃣ Convert & Send
-        Message message = createMessageWithEmail(email);
-        gmail.users().messages().send("me", message).execute();
-
+        Message SenderMessage = createMessageWithEmail(SenderEmailMessage);
+        gmail.users().messages().send("me", SenderMessage).execute();
+        // 6️⃣ Convert & Send
+        Message RecieverMessage = createMessageWithEmail(RecieverEmailMessage);
+        gmail.users().messages().send("me", RecieverMessage).execute();
         System.out.println("✔ EMAIL SENT SUCCESSFULLY!");
     }
+
+
+    // STATUS 0 → Just created → Only notify SENDER (Order Confirmation)
+    public void sendParcelCreatedEmail(Parcel parcel) throws Exception {
+        String html = renderTemplate("emails/parcel-created-sender", parcel);
+
+        sendEmail(
+                parcel.getSenderEmail(),
+                "Your parcel request has been received! ✔",
+                html
+        );
+        System.out.println("Parcel created email sent to sender: " + parcel.getSenderEmail());
+    }
+
+    // STATUS 1 → Picked up by courier → Notify RECIPIENT for the first time
+    public void sendParcelPickedUpEmail(Parcel parcel) throws Exception {
+        String html = renderTemplate("emails/parcel-on-the-way", parcel);
+
+        sendEmail(
+                parcel.getReceiverEmail(),
+                "Good news! A parcel is on its way to you! 🚚",
+                html
+        );
+        System.out.println("On-the-way email sent to recipient: " + parcel.getReceiverEmail());
+    }
+
+    // STATUS 2 → Out for delivery today
+    public void sendOutForDeliveryEmail(Parcel parcel) throws Exception {
+        String html = renderTemplate("emails/parcel-out-for-delivery", parcel);
+
+        sendEmail(
+                parcel.getReceiverEmail(),
+                "Your parcel is out for delivery today! 📦",
+                html
+        );
+    }
+
+    // Reusable template renderer
+    private String renderTemplate(String templateName, Parcel parcel) {
+        Context ctx = new Context();
+        ctx.setVariable("senderName", parcel.getSenderName());
+        ctx.setVariable("recipientName", parcel.getRecieverName());
+        ctx.setVariable("from", parcel.getSenderAddress());
+        ctx.setVariable("to", parcel.getRecieverAddress());
+        ctx.setVariable("cost", parcel.getCost());
+        ctx.setVariable("weight", parcel.getWeight());
+        ctx.setVariable("trackingId", parcel.getTrackingNumber());
+        return templateEngine.process(templateName, ctx);
+    }
+
+    // STATUS 3 → Delivered → Final confirmation
+    public void sendParcelDeliveredEmail(Parcel parcel) throws Exception {
+        String html = renderTemplate("emails/parcel-delivered", parcel);
+
+        // Notify both sender and recipient
+        sendEmail(parcel.getReceiverEmail(), "Your parcel has been delivered! ✔", html);
+        sendEmail(parcel.getSenderEmail(),    "Your parcel was successfully delivered!", html);
+
+        System.out.println("Delivery confirmation sent for parcel: " + parcel.getId());
+    }
+    // Reusable Gmail sender (your original logic, cleaned up)
+    private void sendEmail(String toEmail, String subject, String htmlBody) throws Exception {
+        String accessToken = tokenService.getValidAccessToken();
+
+        HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        HttpRequestInitializer initializer = request ->
+                request.getHeaders().setAuthorization("Bearer " + accessToken);
+
+        Gmail gmail = new Gmail.Builder(httpTransport, GsonFactory.getDefaultInstance(), initializer)
+                .setApplicationName("SendIt Courier")
+                .build();
+
+        MimeMessage email = createEmail(toEmail, "me", subject, htmlBody);
+        Message message = createMessageWithEmail(email);
+
+        gmail.users().messages().send("me", message).execute();
+        System.out.println("Email sent to: " + toEmail + " | Subject: " + subject);
+    }
+
 
 
 

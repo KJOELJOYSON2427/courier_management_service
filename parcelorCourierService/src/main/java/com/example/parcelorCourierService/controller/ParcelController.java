@@ -5,6 +5,7 @@ import com.example.parcelorCourierService.Entity.Parcel;
 import com.example.parcelorCourierService.Entity.dto.ParcelDTO;
 import com.example.parcelorCourierService.Service.ParcelService;
 import com.example.parcelorCourierService.request.CreateParcelRequest;
+import com.example.parcelorCourierService.request.ParcelStatusUpdateRequest;
 import com.example.parcelorCourierService.request.SenderEmailRequest;
 import com.example.parcelorCourierService.request.UpdateParcel;
 import com.example.parcelorCourierService.response.DeleteResponse;
@@ -174,4 +175,29 @@ public class ParcelController {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+    @PutMapping("/parcel/{trackingNumber}/status-update")
+    public ResponseEntity<String> updateParcelState(
+            @PathVariable String trackingNumber,
+            @RequestBody ParcelStatusUpdateRequest request,
+            @RequestHeader Map<String, String> headers
+
+    ) {
+        String userId = headers.get("x-user-id");
+        String email = headers.get("x-user-email");
+        String role = headers.get("x-user-role");
+        System.out.println("User with userId" + userId + "UserEmail" +email + " Role " + role);
+
+
+        // -------- ROLE VALIDATION --------
+        if (role == null || !role.equalsIgnoreCase("ADMIN")) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)   // 403
+                    .body("Unauthorized: Only ADMIN can access this resource");
+        }
+        parcelService.updateParcelState(trackingNumber, request);
+        return ResponseEntity.ok("Parcel status updated successfully!");
+    }
+
 }

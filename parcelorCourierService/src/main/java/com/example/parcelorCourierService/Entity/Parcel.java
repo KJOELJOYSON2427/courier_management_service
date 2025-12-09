@@ -71,8 +71,12 @@ public class Parcel {
     @Enumerated(EnumType.STRING)
     private ParcelStatus status = ParcelStatus.CREATED;
 
-    // DRIVER
-    private Long driverId;
+
+    private LocalDateTime pickedUpByCourierAt;
+
+    private LocalDateTime outForDeliveryAt;  // set when driver starts route
+
+    private LocalDateTime deliveredAt;
 
 //    // HISTORY RELATION
 //    @OneToMany(mappedBy = "parcel", cascade = CascadeType.ALL, orphanRemoval = true)
