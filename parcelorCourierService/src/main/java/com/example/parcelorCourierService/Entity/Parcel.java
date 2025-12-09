@@ -24,33 +24,33 @@ public class Parcel {
 
 
 
-    @Column(unique = true, nullable = false)
+
+    @Column(name = "tracking_number", unique = true, nullable = false)
     private String trackingNumber;
 
-    // REQUIRED SENDER DETAILS
-    @Column(nullable = false)
+    @Column(name = "sender_name", nullable = false)
     private String senderName;
 
-    @Column(nullable = false)
+    @Column(name = "sender_email", nullable = false)
     private String senderEmail;
 
-    @Column(nullable = false)
-    private String senderAddress;  // NEW FIELD ADDED
+    @Column(name = "sender_address", nullable = false)
+    private String senderAddress;
 
     // REQUIRED RECEIVER DETAILS
-    @Column(nullable = false)
+    @Column(name = "receiver_email",nullable = false)
     private String receiverEmail;
 
-    @Column(nullable = false)
+    @Column(name = "reciever_name", nullable = false)
     private String recieverName;
 
-    @Column(nullable = false)
+    @Column(name = "reciever_address",nullable = false)
     private String recieverAddress;
 
     // PARCEL DETAILS
     @Column(nullable = false)
     private double cost;
-
+    @Column(name = "sender_id", nullable = false)
     private Long senderId;
 
     @Column(nullable = false)
@@ -61,22 +61,37 @@ public class Parcel {
 
     // TIMESTAMPS
     @CreationTimestamp
-    @Column(updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     // STATUS
     @Enumerated(EnumType.STRING)
     private ParcelStatus status = ParcelStatus.CREATED;
+// Add these fields to your Parcel class
 
-
+    @Column(name = "picked_up_by_courier_at")
     private LocalDateTime pickedUpByCourierAt;
 
-    private LocalDateTime outForDeliveryAt;  // set when driver starts route
+    @Column(name = "out_for_delivery_at")
+    private LocalDateTime outForDeliveryAt;
 
+    @Column(name = "delivered_at")
     private LocalDateTime deliveredAt;
+    @Column(name = "created_email_sent")
+    private Boolean  createdEmailSent = false;
+
+    @Column(name = "picked_up_email_sent")
+    private Boolean  pickedUpEmailSent = false;
+
+    @Column(name = "out_for_delivery_email_sent")
+    private Boolean  outForDeliveryEmailSent = false;
+
+    @Column(name = "delivered_email_sent")
+    private Boolean  deliveredEmailSent = false;
 
 //    // HISTORY RELATION
 //    @OneToMany(mappedBy = "parcel", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -80,6 +80,17 @@ public class Parcel {
 
     @Column(name = "delivered_at")
     private LocalDateTime deliveredAt;
+    @Column(name = "created_email_sent")
+    private Boolean  createdEmailSent = false;
+
+    @Column(name = "picked_up_email_sent")
+    private Boolean  pickedUpEmailSent = false;
+
+    @Column(name = "out_for_delivery_email_sent")
+    private Boolean  outForDeliveryEmailSent = false;
+
+    @Column(name = "delivered_email_sent")
+    private Boolean  deliveredEmailSent = false;
 
 //    // HISTORY RELATION
 //    @OneToMany(mappedBy = "parcel", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -67,7 +67,7 @@ public class Scheduler {
     }
 
 
-    @Scheduled(cron = "0 */60 * * * *")
+    @Scheduled(cron = "0 */1 * * * *")
     public void processParcelNotifications() {
         System.out.println("Parcel notification scheduler started...");
 
@@ -78,36 +78,39 @@ public class Scheduler {
             try{
                 boolean notified = false;
 
-                // 1. CREATED → Sender confirmation only
-                if(parcel.getStatus() == ParcelStatus.CREATED){
+                if(parcel.getStatus() == ParcelStatus.CREATED && !parcel.getCreatedEmailSent()) {
                     gmailService.sendParcelCreatedEmail(parcel);
                     parcel.setStatus(ParcelStatus.PENDING);
+                    parcel.setCreatedEmailSent(true);
                     notified = true;
                 }
 
-
-                // 2. PENDING → Courier picked it up
-                else if (parcel.getStatus() == ParcelStatus.PENDING
-                        && parcel.getPickedUpByCourierAt() != null) {
-                    gmailService.sendParcelPickedUpEmail(parcel);  // First time recipient knows!
+                else if(parcel.getStatus() == ParcelStatus.PENDING
+                        && parcel.getPickedUpByCourierAt() != null
+                        && !parcel.getPickedUpEmailSent()) {
+                    gmailService.sendParcelPickedUpEmail(parcel);
                     parcel.setStatus(ParcelStatus.IN_TRANSIT);
+                    parcel.setPickedUpEmailSent(true);
                     notified = true;
                 }
 
-                // 3. IN_TRANSIT → Out for delivery today
-                else if (parcel.getStatus() == ParcelStatus.IN_TRANSIT
-                        && parcel.getOutForDeliveryAt() != null) {  // or your flag/method
+                else if(parcel.getStatus() == ParcelStatus.IN_TRANSIT
+                        && parcel.getOutForDeliveryAt() != null
+                        && !parcel.getOutForDeliveryEmailSent()) {
                     gmailService.sendOutForDeliveryEmail(parcel);
-                    // status stays IN_TRANSIT until actually delivered
-
+                    parcel.setOutForDeliveryEmailSent(true);
                     notified = true;
-                }// 4. Any state → Actually delivered
-                else if (parcel.getDeliveredAt() != null
-                        && parcel.getStatus() != ParcelStatus.DELIVERED) {
+                }
+
+                else if(parcel.getDeliveredAt() != null
+                        && parcel.getStatus() != ParcelStatus.DELIVERED
+                        && !parcel.getDeliveredEmailSent()) {
                     gmailService.sendDeliveredEmail(parcel);
                     parcel.setStatus(ParcelStatus.DELIVERED);
+                    parcel.setDeliveredEmailSent(true);
                     notified = true;
                 }
+
 
                 if (notified) {
                     parcelRepository.save(parcel);
