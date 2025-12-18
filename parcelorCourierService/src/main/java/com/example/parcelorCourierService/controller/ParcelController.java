@@ -12,10 +12,15 @@ import com.example.parcelorCourierService.response.DeleteResponse;
 import com.example.parcelorCourierService.response.ParcelResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -79,18 +84,18 @@ public class ParcelController {
     //Get All Parcels
     @GetMapping("/")
     public ResponseEntity<?> getAllParcel(@RequestHeader Map<String, String> headers){
-        String userId = headers.get("x-user-id");
-        String email = headers.get("x-user-email");
-        String role = headers.get("x-user-role");
-        System.out.println("User with userId" + userId + "UserEmail" +email + " Role " + role);
-
-
-        // -------- ROLE VALIDATION --------
-        if (role == null || !role.equalsIgnoreCase("ADMIN")) {
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)   // 403
-                    .body("Unauthorized: Only ADMIN can access this resource");
-        }
+//        String userId = headers.get("x-user-id");
+//        String email = headers.get("x-user-email");
+//        String role = headers.get("x-user-role");
+//        System.out.println("User with userId" + userId + "UserEmail" +email + " Role " + role);
+//
+//
+//        // -------- ROLE VALIDATION --------
+//        if (role == null || !role.equalsIgnoreCase("ADMIN")) {
+//            return ResponseEntity
+//                    .status(HttpStatus.FORBIDDEN)   // 403
+//                    .body("Unauthorized: Only ADMIN can access this resource");
+//        }
         try {
             List<Parcel> parcels = parcelService.getAllParcel();
 
@@ -104,6 +109,76 @@ public class ParcelController {
             return new ResponseEntity<>("Failed to fetch parcels: " + e.getMessage(),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+   //pageable parcel
+    @GetMapping("/h")
+    public ResponseEntity<?> getAllParcel(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "desc") String sortDir,
+            @RequestHeader Map<String, String> headers){
+
+
+        // Optional: Re-enable role check later
+        // String role = headers.get("x-user-role");
+        // if (role == null || !role.equalsIgnoreCase("ADMIN")) {
+        //     return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        //             .body("Unauthorized: Only ADMIN can access this resource");
+        // }
+
+        try {
+            Page<Parcel> parcelPage = parcelService.getAllParcelsPageable(page, size,sortDir);
+
+            // Build structured pagination response
+            Map<String, Object> response = new HashMap<>();
+            response.put("parcels", parcelPage.getContent());
+            response.put("currentPage", parcelPage.getNumber());
+            response.put("totalItems", parcelPage.getTotalElements());
+            response.put("totalPages", parcelPage.getTotalPages());
+            response.put("pageSize", parcelPage.getSize());
+            response.put("hasNext", parcelPage.hasNext());
+            response.put("hasPrevious", parcelPage.hasPrevious());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(
+                    "Failed to fetch parcels: " + e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+
+    @GetMapping("/h2")
+    public ResponseEntity<?> getAllParcels(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String searchText,
+            @RequestParam(required = false) List<String> searchColumns,
+            @RequestParam(defaultValue = "trackingNumber") String sortColumn,
+            @RequestParam(defaultValue = "desc") String sortDir,
+            @RequestHeader Map<String, String> headers){
+
+
+
+        // 1. Prepare Pagination & Sorting
+        Sort sort = sortDir.equalsIgnoreCase("desc") ?
+                Sort.by(sortColumn).descending() : Sort.by(sortColumn).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        // 2. Fetch data from Service
+        Page<Parcel> parcelPage = parcelService.getParcelsWithFilter(searchText, searchColumns, pageable);
+
+        // 3. Build the structured response Map
+        Map<String, Object> response = new HashMap<>();
+        response.put("parcels", parcelPage.getContent());
+        response.put("currentPage", parcelPage.getNumber());
+        response.put("totalItems", parcelPage.getTotalElements());
+        response.put("totalPages", parcelPage.getTotalPages());
+        response.put("pageSize", parcelPage.getSize());
+        response.put("hasNext", parcelPage.hasNext());
+        response.put("hasPrevious", parcelPage.hasPrevious());
+
+        return ResponseEntity.ok(response);
     }
 
 

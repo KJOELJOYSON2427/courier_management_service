@@ -4,6 +4,7 @@ import com.example.parcelorCourierService.Entity.Parcel;
 import com.example.parcelorCourierService.Entity.dto.ParcelDTO;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ParcelRepository extends JpaRepository<Parcel, Long> {
+public interface ParcelRepository extends JpaRepository<Parcel, Long>, JpaSpecificationExecutor<Parcel> {
 
 //    @Query("SELECT p FROM Parcel p LEFT JOIN FETCH p.history WHERE p.trackingNumber = :trackingNumber")
 //    Optional<Parcel> findByTrackingNumberWithHistory(@Param("trackingNumber") String trackingNumber);

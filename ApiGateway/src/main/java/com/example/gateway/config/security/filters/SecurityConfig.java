@@ -70,7 +70,9 @@ public class SecurityConfig {
                  )
                  .authorizeExchange(
                          exchanges -> exchanges
-                                 .pathMatchers("/api/v1/auth/**").permitAll()   // <── this allows register & login
+                                 .pathMatchers("/api/v1/auth/**").permitAll()
+                                 .pathMatchers("/api/v1/parcel/**").permitAll()
+                                 // <── this allows register & login
                                  .pathMatchers("/eureka/**").permitAll()
                                  .anyExchange().authenticated()
                  ).securityContextRepository(NoOpServerSecurityContextRepository.getInstance())

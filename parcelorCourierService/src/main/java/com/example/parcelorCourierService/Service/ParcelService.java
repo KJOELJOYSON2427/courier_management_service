@@ -14,13 +14,19 @@ import com.example.parcelorCourierService.response.DeleteResponse;
 import com.example.parcelorCourierService.response.ParcelResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import jakarta.persistence.criteria.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -174,15 +180,15 @@ public void createParcel(CreateParcelRequest parcelRequest) {
     try {
         Parcel parcel = new Parcel();
 
-        parcel.setTrackingNumber(parcelRequest.getTrackingNumber());
+
 
         parcel.setSenderName(parcelRequest.getSenderName());
         parcel.setSenderEmail(parcelRequest.getSenderEmail());
-        parcel.setSenderAddress(parcelRequest.getSenderAddress());
+        parcel.setSenderAddress(parcelRequest.getFrom());
 
-        parcel.setReceiverEmail(parcelRequest.getReceiverEmail());
-        parcel.setRecieverName(parcelRequest.getRecieverName());
-        parcel.setRecieverAddress(parcelRequest.getRecieverAddress());
+        parcel.setReceiverEmail(parcelRequest.getRecipientEmail());
+        parcel.setRecieverName(parcelRequest.getRecipientName());
+        parcel.setRecieverAddress(parcelRequest.getTo());
 
         parcel.setCost(parcelRequest.getCost());
         parcel.setSenderId(parcelRequest.getSenderId());
@@ -207,6 +213,117 @@ public void createParcel(CreateParcelRequest parcelRequest) {
             throw new RuntimeException("Failed to fetch parcels", e);
         }
     }
+
+
+
+    public Page<Parcel> getAllParcelsPageable(int page, int size, String sortDir){
+
+         try{
+             // Ensure page and size are valid
+             if (page < 0) page = 0;
+             if (size <= 0) size = 10; // default size
+             Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+             Pageable pageable = PageRequest.of(
+                     page,
+                     size,
+                     Sort.by(direction, "createdAt")
+             );
+
+             return parcelRepository.findAll(pageable);
+         } catch (Exception e) {
+             throw new RuntimeException("Failed to fetch parcels with pagination", e);         }
+    }
+
+    private Sort buildSort(
+            String defaultSortDir,
+            String trackingNumberSort,
+            String statusSort
+    ) {
+
+        List<Sort.Order> orders = new ArrayList<>();
+
+        if (trackingNumberSort != null) {
+            orders.add(new Sort.Order(
+                    Sort.Direction.fromString(trackingNumberSort),
+                    "trackingNumber"
+            ));
+        }
+
+        if (statusSort != null) {
+            orders.add(new Sort.Order(
+                    Sort.Direction.fromString(statusSort),
+                    "status"
+            ));
+        }
+
+        // Fallback
+        if (orders.isEmpty()) {
+            orders.add(new Sort.Order(
+                    Sort.Direction.fromString(defaultSortDir),
+                    "createdAt"
+            ));
+        }
+
+        return Sort.by(orders);
+    }
+
+
+    public Page<Parcel> getParcelsWithFilters(
+            int page,
+            int size,
+            String defaultSortDir,
+
+            String from,
+            String to,
+            String trackingNumber,
+            String status,
+
+            String trackingNumberValues,
+            String statusValues,
+
+            String trackingNumberSort,
+            String statusSort
+    ) {
+
+        if (page < 0) page = 0;
+        if (size <= 0) size = 10;
+
+        Sort sort = buildSort(defaultSortDir, trackingNumberSort, statusSort);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        // ✅ Replacement for Specification.where(null)
+        Specification<Parcel> spec = (root, query, cb) -> cb.conjunction();
+
+        if (from != null && !from.isBlank()) {
+            spec = spec.and((root, q, cb) ->
+                    cb.like(cb.lower(root.get("from")), "%" + from.toLowerCase() + "%"));
+        }
+
+        if (to != null && !to.isBlank()) {
+            spec = spec.and((root, q, cb) ->
+                    cb.like(cb.lower(root.get("to")), "%" + to.toLowerCase() + "%"));
+        }
+
+        if (trackingNumber != null && !trackingNumber.isBlank()) {
+            spec = spec.and((root, q, cb) ->
+                    cb.like(root.get("trackingNumber"), "%" + trackingNumber + "%"));
+        }
+
+        if (trackingNumberValues != null) {
+            List<String> values = Arrays.asList(trackingNumberValues.split(","));
+            spec = spec.and((root, q, cb) ->
+                    root.get("trackingNumber").in(values));
+        }
+
+        if (statusValues != null) {
+            List<String> values = Arrays.asList(statusValues.split(","));
+            spec = spec.and((root, q, cb) ->
+                    root.get("status").in(values));
+        }
+
+        return parcelRepository.findAll(spec, pageable);
+    }
+
 
     public ParcelResponse updateParcel(UpdateParcel updateParcel, String trackingNumber) {
         try {
@@ -381,5 +498,32 @@ public void createParcel(CreateParcelRequest parcelRequest) {
     }
 
 
+    public Page<Parcel> getParcelsWithFilter(String searchText, List<String> searchColumns, Pageable pageable) {
 
+
+     return parcelRepository.findAll((root, query, cb)->{
+         // 1. If no search text, return all (conjunction is an empty WHERE clause)
+         if (searchText == null || searchText.trim().isEmpty()) {
+             return cb.conjunction();
+         }
+
+         String pattern="%" + searchText.toLowerCase() + "%";
+         List<Predicate> predicates = new ArrayList<>();
+
+
+         // 2. Define which columns we are allowed to search
+         // If the frontend didn't specify columns, we search all of them by default
+         List<String> columnsToSearch =(searchColumns != null && !searchColumns.isEmpty())
+                 ?searchColumns:List.of("senderAddress", "recieverAddress", "status", "trackingNumber");
+
+         for(String col : columnsToSearch){
+// .as(String.class) allows searching across Enums (status) or Numbers (tracking)
+             predicates.add(cb.like(cb.lower(root.get(col).as(String.class)), pattern));
+
+
+         }
+    return cb.or(predicates.toArray(new Predicate[0]));
+
+     },pageable);
+    }
 }

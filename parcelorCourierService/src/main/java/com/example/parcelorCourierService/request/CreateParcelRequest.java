@@ -8,14 +8,13 @@ import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
 
 @Data
 public class CreateParcelRequest {
 
 
 
-    @NotBlank(message = "Tracking number is required")
-    private String trackingNumber;
 
     // Sender details
     @NotBlank(message = "Sender name is required")
@@ -26,18 +25,18 @@ public class CreateParcelRequest {
     private String senderEmail;
 
     @NotBlank(message = "Sender address is required")
-    private String senderAddress;
+    private String from;
 
     // Receiver details
     @Email(message = "Receiver email is not valid")
     @NotBlank(message = "Receiver email is required")
-    private String receiverEmail;
+    private String recipientEmail;
 
     @NotBlank(message = "Receiver name is required")
-    private String recieverName;
+    private String recipientName;
 
     @NotBlank(message = "Receiver address is required")
-    private String recieverAddress;
+    private String to;
 
     // Parcel details
     @Positive(message = "Cost must be greater than 0")
@@ -50,6 +49,11 @@ public class CreateParcelRequest {
 
     @NotBlank(message = "Dimensions field cannot be empty")
     private String dimensions;
+
+    @NotBlank(message = "Note field cannot be empty")
+    private String note;
+
+
 
 
 }

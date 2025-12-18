@@ -5,8 +5,10 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -24,7 +26,7 @@ public class Parcel {
 
 
 
-
+    @UuidGenerator
     @Column(name = "tracking_number", unique = true, nullable = false)
     private String trackingNumber;
 
@@ -67,7 +69,7 @@ public class Parcel {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
+    private String note;
     // STATUS
     @Enumerated(EnumType.STRING)
     private ParcelStatus status = ParcelStatus.CREATED;
@@ -96,4 +98,6 @@ public class Parcel {
 //    // HISTORY RELATION
 //    @OneToMany(mappedBy = "parcel", cascade = CascadeType.ALL, orphanRemoval = true)
 //    private List<ParcelHistory> history;
+
+
 }

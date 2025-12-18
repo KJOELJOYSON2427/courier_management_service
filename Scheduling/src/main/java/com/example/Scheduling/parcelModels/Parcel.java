@@ -6,7 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-
+import org.hibernate.annotations.UuidGenerator;
 @Data
 @Entity
 @Table(name = "parcels")
@@ -23,7 +23,7 @@ public class Parcel {
 
 
 
-
+    @UuidGenerator
     @Column(name = "tracking_number", unique = true, nullable = false)
     private String trackingNumber;
 
@@ -77,7 +77,7 @@ public class Parcel {
 
     @Column(name = "out_for_delivery_at")
     private LocalDateTime outForDeliveryAt;
-
+    private String note;
     @Column(name = "delivered_at")
     private LocalDateTime deliveredAt;
     @Column(name = "created_email_sent")

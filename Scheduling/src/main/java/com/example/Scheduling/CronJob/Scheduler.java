@@ -52,7 +52,7 @@ public class Scheduler {
            return recentCreatedUser;
        }
 
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 3600000)  //every i hour
     public void sendWelcomeEmails() {
       List<User>  newUsers = findStatusWithDefaultValue();
 
@@ -67,7 +67,7 @@ public class Scheduler {
     }
 
 
-    @Scheduled(cron = "0 */1 * * * *")
+    @Scheduled(cron = "0 0 * * * *")
     public void processParcelNotifications() {
         System.out.println("Parcel notification scheduler started...");
 
