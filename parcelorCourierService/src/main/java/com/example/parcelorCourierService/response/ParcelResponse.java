@@ -21,8 +21,9 @@ public class ParcelResponse {
     private double weight;
     private String dimensions;
 
-    private Long driverId;
+    private String note;
     private String status;
+    private Long senderId;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

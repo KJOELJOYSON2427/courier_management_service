@@ -2,7 +2,10 @@ package com.example.userService.service;
 
 import com.example.userService.Response.LoginResponse;
 import com.example.userService.Response.UserResponse;
+import com.example.userService.fiegnClient.ParcelClient;
 import com.example.userService.model.User;
+import com.example.userService.model.UserWithParcelCountDTO;
+import com.example.userService.repository.Specification.UserSpecification;
 import com.example.userService.repository.UserRepository;
 import com.example.userService.request.CreateUserRequest;
 import com.example.userService.request.LoginRequest;
@@ -10,11 +13,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -23,6 +32,9 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ParcelClient parcelClient;
 
     @Autowired
     private JwtService jwtService;
@@ -119,8 +131,50 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();  // returns all users
+    public List<UserWithParcelCountDTO> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        Map<Long, Long> parcelCounts = parcelClient.getParcelCounts();
+        // returns all users
+
+        return  users.stream()
+                .map(user -> new UserWithParcelCountDTO(
+                        user.getId(),
+                        user.getFullName(),
+                        user.getEmail(),
+                        parcelCounts.getOrDefault(user.getId(), 0L)
+                )).toList();
+    }
+
+    public Page<UserWithParcelCountDTO> getAllUsers(
+            int page,
+            int size,
+            Long id,
+            String email,
+            String sortBy,
+            String sortDir
+    ) {
+
+        Sort sort = sortDir.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Specification<User> spec = UserSpecification.filter(id, email);
+
+        Page<User> usersPage = userRepository.findAll(spec, pageable);
+
+        // 🔗 Bulk parcel counts (ONE call)
+        Map<Long, Long> parcelCounts = parcelClient.getParcelCounts();
+
+        return usersPage.map(user ->
+                new UserWithParcelCountDTO(
+                        user.getId(),
+                        user.getFullName(),
+                        user.getEmail(),
+                        parcelCounts.getOrDefault(user.getId(), 0L)
+                )
+        );
     }
 
 

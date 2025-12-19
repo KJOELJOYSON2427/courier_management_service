@@ -35,4 +35,11 @@ public interface ParcelRepository extends JpaRepository<Parcel, Long>, JpaSpecif
 
     //To get The Parcel By the SenderEmail
     List<Parcel> findBySenderEmail(String email, Sort sort);
+
+    @Query("""
+SELECT p.senderId, COUNT(p)
+FROM Parcel p
+GROUP BY p.senderId
+""")
+    List<Object[]> countParcelsGroupBySender();
 }

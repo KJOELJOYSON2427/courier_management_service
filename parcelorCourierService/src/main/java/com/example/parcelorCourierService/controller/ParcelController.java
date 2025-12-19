@@ -275,4 +275,13 @@ public class ParcelController {
         return ResponseEntity.ok("Parcel status updated successfully!");
     }
 
+
+
+      @GetMapping("/sender/counts")
+      public Map<Long, Long> getParcelCountsBySender(){
+
+
+         return parcelService.getParcelCountsBySender();
+      }
+
 }

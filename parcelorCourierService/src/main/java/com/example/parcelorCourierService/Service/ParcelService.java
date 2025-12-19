@@ -22,10 +22,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
 import jakarta.persistence.criteria.Predicate;
 import java.util.stream.Collectors;
 
@@ -333,7 +331,18 @@ public void createParcel(CreateParcelRequest parcelRequest) {
                 throw new RuntimeException("Parcel not found with tracking number: " + trackingNumber);
             }
 
-            // Update only provided fields
+            // ===== Sender Updates =====
+            if (updateParcel.getFrom() != null)
+                parcel.setSenderAddress(updateParcel.getFrom());
+
+            if (updateParcel.getSenderName() != null)
+                parcel.setSenderName(updateParcel.getSenderName());
+            if (updateParcel.getSenderId() != null)
+                parcel.setSenderId(updateParcel.getSenderId());
+            if (updateParcel.getSenderEmail() != null)
+                parcel.setSenderEmail(updateParcel.getSenderEmail());
+
+            // ===== Receiver Updates =====
             if (updateParcel.getReceiverEmail() != null)
                 parcel.setReceiverEmail(updateParcel.getReceiverEmail());
 
@@ -343,6 +352,13 @@ public void createParcel(CreateParcelRequest parcelRequest) {
             if (updateParcel.getRecieverAddress() != null)
                 parcel.setRecieverAddress(updateParcel.getRecieverAddress());
 
+            if (updateParcel.getTo() != null)
+                parcel.setRecieverAddress(updateParcel.getTo());
+
+            if (updateParcel.getRecipientEmail() != null)
+                parcel.setReceiverEmail(updateParcel.getRecipientEmail());
+
+            // ===== Parcel Updates =====
             if (updateParcel.getCost() != null && updateParcel.getCost() > 0)
                 parcel.setCost(updateParcel.getCost());
 
@@ -352,14 +368,17 @@ public void createParcel(CreateParcelRequest parcelRequest) {
             if (updateParcel.getDimensions() != null)
                 parcel.setDimensions(updateParcel.getDimensions());
 
-
-
             if (updateParcel.getStatus() != null)
                 parcel.setStatus(ParcelStatus.valueOf(updateParcel.getStatus()));
 
+            // ===== Meta =====
+            if (updateParcel.getNote() != null)
+                parcel.setNote(updateParcel.getNote());
+
+            // Persist
             parcelRepository.save(parcel);
 
-            // Convert to response DTO
+            // ===== Response Mapping =====
             ParcelResponse response = new ParcelResponse();
             response.setTrackingNumber(parcel.getTrackingNumber());
             response.setSenderName(parcel.getSenderName());
@@ -369,6 +388,7 @@ public void createParcel(CreateParcelRequest parcelRequest) {
             response.setRecieverName(parcel.getRecieverName());
             response.setRecieverAddress(parcel.getRecieverAddress());
             response.setCost(parcel.getCost());
+            response.setSenderId(parcel.getSenderId());
             response.setWeight(parcel.getWeight());
             response.setDimensions(parcel.getDimensions());
             response.setStatus(parcel.getStatus().name());
@@ -377,10 +397,15 @@ public void createParcel(CreateParcelRequest parcelRequest) {
 
             return response;
 
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid parcel status value", e);
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to update parcel: " + e.getMessage(), e);
         }
     }
+
 
     public ParcelResponse getOneParcel(String trackingNumber) {
         try {
@@ -401,6 +426,8 @@ public void createParcel(CreateParcelRequest parcelRequest) {
             response.setRecieverName(parcel.getRecieverName());
             response.setRecieverAddress(parcel.getRecieverAddress());
             response.setCost(parcel.getCost());
+            response.setNote(parcel.getNote());
+            response.setSenderId(parcel.getSenderId());
             response.setWeight(parcel.getWeight());
             response.setDimensions(parcel.getDimensions());
             response.setStatus(parcel.getStatus().name());
@@ -525,5 +552,18 @@ public void createParcel(CreateParcelRequest parcelRequest) {
     return cb.or(predicates.toArray(new Predicate[0]));
 
      },pageable);
+    }
+
+
+
+    public Map<Long, Long> getParcelCountsBySender(){
+        Map<Long, Long> result = new HashMap<>();
+
+        for (Object[] row : parcelRepository.countParcelsGroupBySender()) {
+            Long senderId = (Long) row[0];
+            Long count = (Long) row[1];
+            result.put(senderId, count);
+        }
+        return result;
     }
 }
